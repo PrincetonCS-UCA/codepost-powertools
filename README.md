@@ -12,6 +12,11 @@ Some helpful codePost tools to aid with grading flow using the
 These tools were originally created to support the grading process for COS126,
 the introductory Computer Science course at Princeton University.
 
+## Documentation
+
+The documentation can be found
+[here](https://codepost-powertools.readthedocs.io/en/latest/).
+
 ## Development
 
 Please see [`DEV_README.md`](DEV_README.md).
