@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 codepost-powertools documentation
-===========================================
+=================================
 
 Release |release|
 
