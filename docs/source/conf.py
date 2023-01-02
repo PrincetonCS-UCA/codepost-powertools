@@ -13,10 +13,10 @@ project_copyright = f'2023, {author}'
 try:
     import codepost_powertools
     release = codepost_powertools.__version__
-    version = release[:release.rfind('.')]
 except ImportError:
-    release = ''
-    version = ''
+    release = '0.0.0'
+# only up to the major version
+version = release[:release.rfind('.')]
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -25,8 +25,6 @@ extensions = []
 
 templates_path = ['_templates']
 exclude_patterns = []
-
-
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
