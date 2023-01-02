@@ -6,7 +6,7 @@
 codepost-powertools documentation
 ===========================================
 
-Version |version|
+Release |release|
 
 .. toctree::
    :maxdepth: 2
