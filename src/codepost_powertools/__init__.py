@@ -1,4 +1,4 @@
 """
 __init__.py
-`codepost_powertools` package
+The `codepost_powertools` package.
 """
