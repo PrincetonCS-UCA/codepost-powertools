@@ -7,13 +7,16 @@ license = "MIT"
 readme = "README.md"
 packages = [{include = "codepost_powertools", from = "src"}]
 
+[tool.poetry.scripts]
+cptools = "codepost_powertools.__main__:cli"
+
 [tool.poetry.dependencies]
 python = "^3.10"
 
 [tool.poetry.group.dev.dependencies]
 isort = "^5.11.4"
-yapf = "^0.32.0"
 pylint = "^2.15.9"
+yapf = "^0.32.0"
 
 [build-system]
 requires = ["poetry-core"]
