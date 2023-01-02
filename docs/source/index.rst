@@ -3,8 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to codepost-powertools's documentation!
-===============================================
+codepost-powertools documentation
+===========================================
+
+Version |version|
 
 .. toctree::
    :maxdepth: 2

@@ -7,9 +7,16 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'codepost-powertools'
-copyright = '2023, Joseph Lou'
-author = 'Joseph Lou'
-release = 'v0.1.0'
+author = 'PrincetonCS-UCAs'
+project_copyright = f'2023, {author}'
+
+try:
+    import codepost_powertools
+    release = codepost_powertools.__version__
+    version = release[:release.rfind('.')]
+except ImportError:
+    release = ''
+    version = ''
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
