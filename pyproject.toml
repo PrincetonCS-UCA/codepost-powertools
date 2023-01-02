@@ -22,7 +22,10 @@ yapf = "^0.32.0"
 optional = true
 
 [tool.poetry.group.docs.dependencies]
-sphinx = "^6.0.0"
+# as of 2023-01-02, sphinx-rtd-theme v1.1.1 does not allow sphinx v6.0.0,
+# released on 2022-12-29. Thus, I have to use sphinx@^5.3.0
+sphinx = "^5.3.0"
+sphinx-rtd-theme = "^1.1.1"
 
 [build-system]
 requires = ["poetry-core"]
