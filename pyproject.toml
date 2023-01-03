@@ -1,8 +1,11 @@
 [tool.black]
-line_length = 79
+line-length = 79
 
 [tool.isort]
 profile = "black"
+# Just setting the profile will use the `black` default line length of 88, so
+# need to override line length as well
+line_length = 79
 
 [tool.poetry]
 name = "codepost-powertools"

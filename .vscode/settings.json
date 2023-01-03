@@ -9,6 +9,5 @@
     "editor.rulers": [72, 79]
   },
   "python.linting.pylintEnabled": true,
-  "python.formatting.provider": "black",
-  "isort.args": ["--profile", "black"]
+  "python.formatting.provider": "black"
 }
