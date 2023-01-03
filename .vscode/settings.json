@@ -1,24 +1,12 @@
 {
-  "editor.formatOnSave": true,
   "[python]": {
     "editor.tabSize": 4,
-    "editor.defaultFormatter": "ms-python.python",
+    "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.organizeImports": true
     },
     "editor.rulers": [72, 79]
   },
   "python.linting.pylintEnabled": true,
-  "python.linting.pylintArgs": [
-    "--max-line-length=79",
-    "--disable=C0103,C0116,C0209",
-    "--disable=E0401",
-    "--disable=R0902,R0903,R0911,R0912,R0913,R0914,R0915",
-    "--disable=W0613",
-    "--notes=TODO,FIXME,FUTURE"
-  ],
-  "python.formatting.provider": "yapf",
-  "python.formatting.yapfArgs": [
-    "--style={based_on_style: google, column_limit: 79, allow_split_before_dict_value: false, spaces_around_power_operator: true}"
-  ]
+  "python.formatting.provider": "black"
 }
