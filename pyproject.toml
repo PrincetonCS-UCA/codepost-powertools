@@ -1,6 +1,9 @@
 [tool.black]
 line_length = 79
 
+[tool.isort]
+profile = "black"
+
 [tool.poetry]
 name = "codepost-powertools"
 version = "0.1.0"
