@@ -7,4 +7,4 @@ The `codepost_powertools` package on the command line.
 
 
 def cli():
-    print('codePost Powertools!')
+    print("codePost Powertools!")
