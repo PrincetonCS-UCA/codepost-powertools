@@ -5,4 +5,15 @@ The `codepost_powertools` package.
 
 # =============================================================================
 
-__version__ = "0.1.0"
+from codepost_powertools import grading
+
+# Implicitly run the config file
+from codepost_powertools.config import log_in_codepost
+from codepost_powertools.version import __version__
+
+# =============================================================================
+
+__all__ = (
+    "log_in_codepost",
+    "grading",
+)

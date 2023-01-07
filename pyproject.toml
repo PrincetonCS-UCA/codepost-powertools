@@ -21,6 +21,10 @@ cptools = "codepost_powertools.__main__:cli"
 
 [tool.poetry.dependencies]
 python = "^3.10"
+click = "^8.1.3"
+codepost = "^0.2.29"
+comma = "^0.5.4"
+loguru = "^0.6.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.12.0"
