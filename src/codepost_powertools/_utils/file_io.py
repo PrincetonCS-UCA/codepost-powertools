@@ -1,5 +1,4 @@
 """
-file_io.py
 Utilities for reading and writing files.
 """
 
@@ -21,8 +20,6 @@ from codepost_powertools.utils.cptypes import Assignment, Course
 
 # =============================================================================
 
-OUTPUT_FOLDER = Path("output")
-
 DEFAULT_EXTS = (
     ".txt",
     ".csv",
@@ -40,24 +37,26 @@ def get_path(
     folder: PathLike = None,
     log: bool = False,
 ) -> SuccessOrNone[Path]:
-    """Gets the path "[course]/[assignment]/[folder]/[file]".
+    """Gets the path ``"[start_dir]/[course]/[assignment]/[folder]/[file]"``.
 
-    If `course` is None, `assignment` will not be included.
+    If ``course`` is None, ``assignment`` will not be included.
 
     Args:
-        start_dir (PathLike): The starting directory.
-        filename (PathLike): The file.
-        course (Course): The course.
-        assignment (Assignment): The assignment.
-        folder (PathLike): The output folder.
-        log (bool): Whether to show log messages.
+        start_dir (|PathLike|): The starting directory.
+        filename (|PathLike|): The file.
+        course (|Course|_): The course.
+        assignment (|Assignment|_): The assignment.
+        folder (|PathLike|): The output folder.
+        log (|bool|): Whether to show log messages.
 
     Returns:
-        SuccessOrNone[Path]: The resulting path.
+        |SuccessOrNone| [|Path|]: The resulting path.
 
     Raises:
-        FileNotFoundError: If `start_dir` does not exist.
-        NotADirectoryError: If `start_dir` is not a directory.
+        FileNotFoundError: If ``start_dir`` does not exist.
+        NotADirectoryError: If ``start_dir`` is not a directory.
+
+    .. versionadded:: 0.1.0
     """
     _logger = _get_logger(log)
 
@@ -75,13 +74,13 @@ def get_path(
         return False, None
 
     if course is not None:
-        result = result / course_str(course, delim="_")
+        result = result / course_str(course, delim="_", slugify=True)
         if assignment is not None:
             result = result / assignment.name
     elif assignment is not None:
         _logger.warning(
             "Assignment ({!r}) will not be included: course was not given",
-            assignment,
+            assignment.name,
         )
 
     if folder is not None:
@@ -97,14 +96,17 @@ def get_path(
 
 
 def validate_csv_silent(filepath: PathLike) -> SuccessOrErrorMsg:
-    """Validates that the given filepath has a ".csv" extension.
+    """Validates that the given filepath has a ``".csv"`` extension.
 
     Args:
-        filepath (PathLike): The filepath.
+        filepath (|PathLike|): The filepath.
 
     Returns:
-        SuccessOrErrorMsg: Whether the given filepath is a csv file, and
-            an error message if not.
+        |SuccessOrErrorMsg|:
+            Whether the given filepath is a csv file, and an error
+            message if not.
+
+    .. versionadded:: 0.1.0
     """
     path = Path(filepath)
     if path.suffix != ".csv":
@@ -113,17 +115,19 @@ def validate_csv_silent(filepath: PathLike) -> SuccessOrErrorMsg:
 
 
 def validate_csv(filepath: PathLike, *, log: bool = False) -> bool:
-    """Validates that the given filepath has a ".csv" extension.
+    """Validates that the given filepath has a ``".csv"`` extension.
 
     Args:
-        filepath (PathLike): The filepath.
-        log (bool): Whether to show log messages.
+        filepath (|PathLike|): The filepath.
+        log (|bool|): Whether to show log messages.
 
     Returns:
-        bool: Whether the given filepath is a csv file.
+        |bool|: Whether the given filepath is a csv file.
 
     Raises:
-        ValueError: If `filepath` is not a csv file.
+        ValueError: If ``filepath`` is not a csv file.
+
+    .. versionadded:: 0.1.0
     """
     success, error_msg = validate_csv_silent(filepath)
     if not success:
@@ -137,27 +141,32 @@ def save_csv(
     *,
     description: str = "data",
     log: bool = False,
-):
+) -> bool:
     """Saves data into a csv file.
 
-    If `filepath` is not a csv file, does nothing.
-
     Args:
-        data (Iterable[Mapping[str, Any]]): The data.
-        filepath (PathLike): The path of the csv file.
-        description (str): The description of the log message.
-        log (bool): Whether to show log messages.
+        data (``Iterable[Mapping[str, Any]]``): The data.
+            Each element in the iterable should be a mapping from the
+            column name to the value. Each mapping object should have
+            all the keys of the resulting csv file.
+        filepath (|PathLike|): The path of the csv file.
+        description (|str|): The description of the log message.
+        log (|bool|): Whether to show log messages.
+
+    Returns:
+        |bool|: Whether the data was successfully saved.
 
     Raises:
-        ValueError: If `filepath` is not a csv file.
+        ValueError: If ``filepath`` is not a csv file.
     """
     _logger = _get_logger(log)
 
     success = validate_csv(filepath, log=log)
     if not success:
-        return
+        return False
 
     _logger.info("Saving {} to: {}", description, filepath)
 
     Path(filepath).parent.mkdir(parents=True, exist_ok=True)
     comma.dump(data, filepath)
+    return True

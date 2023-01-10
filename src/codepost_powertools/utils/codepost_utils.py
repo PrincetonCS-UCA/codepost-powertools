@@ -1,12 +1,10 @@
 """
-codepost_utils.py
 Utilities involving the codePost SDK.
 """
 
 # =============================================================================
 
 import functools
-from typing import Optional
 
 import codepost
 
@@ -38,8 +36,19 @@ __all__ = (
 def with_course(func):
     """Decorates a function to fetch a course before calling.
 
-    If the retrieval is unsuccessful, `None` will be passed to the
-    function, where it should handle that case accordingly.
+    This decorator will fetch a |Course|_ if necessary to call the
+    decorated function.
+
+    .. code-block:: python
+
+       func(course: CourseArg, *args, **kwargs) -> RT
+       # becomes
+       func(course: Course | None, *args, **kwargs) -> RT
+
+    If the retrieval is unsuccessful, ``course`` will be passed as
+    ``None``, which the function should handle itself.
+
+    .. versionadded:: 0.1.0
     """
 
     @functools.wraps(func)
@@ -60,16 +69,34 @@ def with_course_and_assignment(func):
     """Decorates a function to fetch a course and assignment before
     calling.
 
-    If the retrievals are unsuccessful, `None` will be passed to the
-    function, where it should handle that case accordingly.
+    This decorator will fetch a |Course|_ and |Assignment|_ if necessary
+    to call the decorated function.
+
+    .. code-block:: python
+
+       func(
+         course: CourseArg, assignment: AssignmentArg,
+         *args, **kwargs
+       ) -> RT
+       # becomes
+       func(
+         course: Course | None, assignment: Assignment | None,
+         *args, **kwargs
+       ) -> RT
+
+    If any retrievals are unsuccessful, ``course`` and ``assignment``
+    will both be passed as ``None``, which the function should handle
+    itself.
+
+    .. versionadded:: 0.1.0
     """
 
     @functools.wraps(func)
     @with_course
     def wrapped(
-        course: Optional[Course], assignment: AssignmentArg, *args, **kwargs
+        course: Course | None, assignment: AssignmentArg, *args, **kwargs
     ):
-        log = kwargs.get("log", False)
+        log: bool = kwargs.get("log", False)
         if course is None:
             # course retrieval failed; cannot get assignment
             assignment = None
@@ -95,15 +122,18 @@ def get_course(
     found is returned.
 
     Args:
-        name (str): The course name.
-        period (str): The course period.
-        log (bool): Whether to show log messages.
+        name (|str|): The course name.
+        period (|str|): The course period.
+        log (|bool|): Whether to show log messages.
 
     Returns:
-        SuccessOrNone[Course]: The course.
+        |SuccessOrNone| [|Course|_]:
+            The course.
 
     Raises:
         ValueError: If no course is found.
+
+    .. versionadded:: 0.1.0
     """
     _logger = _get_logger(log)
 
@@ -125,14 +155,30 @@ def get_course(
     return False, None
 
 
-def course_str(course: Course, delim: str = " ") -> str:
+def course_str(
+    course: Course, *, delim: str = " ", slugify: bool = False
+) -> str:
     """Returns a str representation of a course.
 
     Args:
-        course (Course): The course.
-        delim (str): A deliminating str between the name and the period.
+        course (|Course|_): The course.
+        delim (|str|): A delimiting string between the name and the
+            period.
+        slugify (|bool|): Whether to slugify the result.
+
+    Returns:
+        |str|: A string representation of the course.
+
+    .. note::
+       The slugification is not very good; it simply converts all spaces
+       to underscores.
+
+    .. versionadded:: 0.1.0
     """
-    return f"{course.name}{delim}{course.period}"
+    result = f"{course.name}{delim}{course.period}"
+    if slugify:
+        result = result.replace(" ", "_")
+    return result
 
 
 # =============================================================================
@@ -145,11 +191,14 @@ def get_course_roster(
     """Gets the roster for the given course.
 
     Args:
-        course (CourseArg): The course.
-        log (bool): Whether to show log messages.
+        course (|CourseArg|): The course.
+        log (|bool|): Whether to show log messages.
 
     Returns:
-        SuccessOrNone[Roster]: The roster.
+        |SuccessOrNone| [|Roster|_]:
+            The roster.
+
+    .. versionadded:: 0.1.0
     """
     _logger = _get_logger(log)
 
@@ -164,23 +213,30 @@ def get_course_roster(
 # =============================================================================
 
 
+@with_course
 def get_assignment(
     course: Course, assignment_name: str, *, log: bool = False
 ) -> SuccessOrNone[Assignment]:
     """Gets a codePost assignment from a course.
 
     Args:
-        course (Course): The course.
-        assignment_name (str): The assignment name.
-        log (bool): Whether to show log messages.
+        course (|CourseArg|): The course.
+        assignment_name (|str|): The assignment name.
+        log (|bool|): Whether to show log messages.
 
     Returns:
-        SuccessOrNone[Assignment]: The assignment.
+        |SuccessOrNone| [|Assignment|_]:
+            The assignment.
 
     Raises:
         ValueError: If the assignment is not found.
+
+    .. versionadded:: 0.1.0
     """
     _logger = _get_logger(log)
+
+    if course is None:
+        return False, None
 
     _logger.info("Getting assignment {!r}", assignment_name)
 

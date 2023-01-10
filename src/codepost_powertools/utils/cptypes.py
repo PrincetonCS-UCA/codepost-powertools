@@ -1,6 +1,5 @@
 """
-cptypes.py
-The codePost types.
+All the codePost types, for convenience.
 """
 
 # =============================================================================

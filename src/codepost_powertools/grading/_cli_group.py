@@ -1,5 +1,4 @@
 """
-_cli_group.py
 Holds the CLI grading group.
 """
 

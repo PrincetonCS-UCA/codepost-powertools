@@ -1,5 +1,4 @@
 """
-__init__.py
 The grading group contains commands for admin grading tasks.
 """
 

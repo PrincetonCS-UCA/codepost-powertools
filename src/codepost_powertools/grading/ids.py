@@ -1,5 +1,4 @@
 """
-ids.py
 Creates a mapping between student emails and submission ids.
 """
 
@@ -16,11 +15,7 @@ from codepost_powertools._utils.cli_utils import (
     log_start_end,
 )
 from codepost_powertools._utils.file_io import get_path, save_csv, validate_csv
-from codepost_powertools._utils.types import (
-    ParamPathOut,
-    PathLike,
-    SuccessOrNone,
-)
+from codepost_powertools._utils.types import ParamPathOut, PathLike
 from codepost_powertools.grading._cli_group import group
 from codepost_powertools.utils.codepost_utils import (
     get_course_roster,
@@ -47,40 +42,43 @@ def get_ids_mapping(
     include_all_students: bool = False,
     save_file: bool | PathLike = False,
     log: bool = False,
-) -> SuccessOrNone[Dict[str, int | None]]:
+) -> Dict[str, int | None]:
     """Returns a mapping between student emails and submission ids.
 
     The mapping will be from student emails to submission ids. If
-    `include_all_students` is True, it will include the entire course
+    ``include_all_students`` is True, it will include the entire course
     roster of students, so the submission id will be None if a student
     does not have a submission for the given assignment. Otherwise, the
     only students included will be those with a submission for the given
     assignment.
 
-    If `save_file` is truthy, a csv file will be saved with the columns
-    `"submission_id"` and `"email"`. Since a submission may have
-    multiple students, multiple rows may have the same `"submission_id"`
-    value. Note that students without a submission do not appear in this
-    file.
+    If ``save_file`` is truthy, a csv file will be saved with the
+    columns ``"submission_id"`` and ``"email"``. Since a submission may
+    have multiple students, multiple rows may have the same
+    ``"submission_id"`` value. Note that students without a submission
+    do not appear in this file.
 
-    If `save_file` is a path, that will be used. Otherwise (if
-    `save_file` is True), the default file `"OUTPUT/ids.csv"` will be
-    used.
+    If ``save_file`` is a path, that will be used. Otherwise (if
+    ``save_file`` is True), the default file ``"OUTPUT/ids.csv"`` will
+    be used.
 
     Args:
-        course (CourseArg): The course.
-        assignment (AssignmentArg): The assignment.
-        include_all_students (bool): Whether to include the entire
+        course (|CourseArg|): The course.
+        assignment (|AssignmentArg|): The assignment.
+        include_all_students (|bool|): Whether to include the entire
             course roster of students.
-        save_file (bool | PathLike): The csv file to save the data to.
-        log (bool): Whether to show log messages.
+        save_file (|bool| or |PathLike|): The csv file to save the data to.
+        log (|bool|): Whether to show log messages.
 
     Returns:
-        SuccessOrNone[Dict[str, int | None]]:
-            The mapping from student emails to submission ids.
+        ``Dict[str, int | None]``:
+            The mapping from student emails to submission ids. If the
+            retrievals failed, returns an empty dict.
 
     Raises:
-        ValueError: If `log` is False and `filepath` is not a csv file.
+        ValueError: If ``filepath`` is not a csv file.
+
+    .. versionadded:: 0.1.0
     """
     _logger = _get_logger(log)
 
@@ -143,9 +141,7 @@ def get_ids_mapping(
 # =============================================================================
 
 
-@group.command(
-    "ids", help="Creates a mapping between student emails and submission ids."
-)
+@group.command("ids", help=__doc__)
 @click.argument("course_name", type=str, required=True)
 @click.argument("course_period", type=str, required=True)
 @click.argument("assignment", type=str, required=True)

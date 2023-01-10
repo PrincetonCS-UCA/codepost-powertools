@@ -1,5 +1,4 @@
 """
-_logger.py
 Gets a logger to log messages or do nothing.
 """
 
@@ -8,6 +7,11 @@ Gets a logger to log messages or do nothing.
 import sys
 
 from loguru import logger
+from loguru._logger import Logger
+
+# =============================================================================
+
+__all__ = ("_get_logger",)
 
 # =============================================================================
 
@@ -25,6 +29,8 @@ class NullLogger:
 
     This object acts as a linked list to itself: it returns itself on
     all attribute accesses and when called.
+
+    .. versionadded:: 0.1.0
     """
 
     def __call__(self, *args, **kwargs):
@@ -39,10 +45,17 @@ _null_logger = NullLogger()
 # =============================================================================
 
 
-def _get_logger(log: bool):
+def _get_logger(log: bool) -> Logger | NullLogger:
     """Gets a logger to log messages or do nothing based on `log`.
 
     Args:
         log (bool): Whether to show log messages.
+
+    Returns:
+        Logger | NullLogger:
+            If ``log`` is True, a functional logger.
+            Otherwise, a "null logger" that does nothing.
+
+    .. versionadded:: 0.1.0
     """
     return logger if log else _null_logger
