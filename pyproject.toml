@@ -39,6 +39,9 @@ optional = true
 # as of 2023-01-02, sphinx-rtd-theme v1.1.1 does not allow sphinx v6.0.0,
 # released on 2022-12-29. Thus, I have to use sphinx@^5.3.0
 sphinx = "^5.3.0"
+# https://github.com/readthedocs/sphinx_rtd_theme/issues/1115
+# need to use doctuils v0.16 to fix a CSS error
+docutils = "=0.16"
 sphinx-autobuild = "^2021.3.14"
 sphinx-rtd-theme = "^1.1.1"
 sphinx-toolbox = "^3.2.0"
