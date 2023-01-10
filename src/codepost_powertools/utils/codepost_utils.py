@@ -5,6 +5,7 @@ Utilities involving the codePost SDK.
 # =============================================================================
 
 import functools
+from typing import Optional
 
 import codepost
 
@@ -94,7 +95,7 @@ def with_course_and_assignment(func):
     @functools.wraps(func)
     @with_course
     def wrapped(
-        course: Course | None, assignment: AssignmentArg, *args, **kwargs
+        course: Optional[Course], assignment: AssignmentArg, *args, **kwargs
     ):
         log: bool = kwargs.get("log", False)
         if course is None:

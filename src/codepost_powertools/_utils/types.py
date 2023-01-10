@@ -49,7 +49,7 @@ Type definitions and aliases.
 
 from os import PathLike as os_PathLike
 from pathlib import Path
-from typing import Literal, Tuple, TypeVar
+from typing import Literal, Tuple, TypeVar, Union
 
 import click
 
@@ -58,20 +58,22 @@ from codepost_powertools.utils.cptypes import Assignment, Course
 # =============================================================================
 
 # A path-like argument
-PathLike = os_PathLike | str
+PathLike = Union[os_PathLike, str]
 
 # The course object, or a tuple of course name and period
-CourseArg = Course | Tuple[str, str]
+CourseArg = Union[Course, Tuple[str, str]]
 # The assignment object, or the assignment name
-AssignmentArg = Assignment | str
+AssignmentArg = Union[Assignment, str]
 
 # The return type of a "successful" function: either True and the return
 # value, or False and None
 T = TypeVar("T")
-SuccessOrNone = Tuple[Literal[True], T] | Tuple[Literal[False], None]
+SuccessOrNone = Union[Tuple[Literal[True], T], Tuple[Literal[False], None]]
 # The return type of a "silent" function: either True and None, or False
 # and an error message
-SuccessOrErrorMsg = Tuple[Literal[True], None] | Tuple[Literal[False], str]
+SuccessOrErrorMsg = Union[
+    Tuple[Literal[True], None], Tuple[Literal[False], str]
+]
 
 # =============================================================================
 

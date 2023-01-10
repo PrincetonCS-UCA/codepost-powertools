@@ -5,6 +5,7 @@ Gets a logger to log messages or do nothing.
 # =============================================================================
 
 import sys
+from typing import Union
 
 from loguru import logger
 from loguru._logger import Logger
@@ -45,14 +46,14 @@ _null_logger = NullLogger()
 # =============================================================================
 
 
-def _get_logger(log: bool) -> Logger | NullLogger:
+def _get_logger(log: bool) -> Union[Logger, NullLogger]:
     """Gets a logger to log messages or do nothing based on `log`.
 
     Args:
-        log (bool): Whether to show log messages.
+        log (|bool|): Whether to show log messages.
 
     Returns:
-        Logger | NullLogger:
+        ``Logger`` | ``NullLogger``:
             If ``log`` is True, a functional logger.
             Otherwise, a "null logger" that does nothing.
 

@@ -4,7 +4,7 @@ Creates a mapping between student emails and submission ids.
 
 # =============================================================================
 
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 import click
 
@@ -40,9 +40,9 @@ def get_ids_mapping(
     assignment: Assignment,
     *,
     include_all_students: bool = False,
-    save_file: bool | PathLike = False,
+    save_file: Union[bool, PathLike] = False,
     log: bool = False,
-) -> Dict[str, int | None]:
+) -> Dict[str, Optional[int]]:
     """Returns a mapping between student emails and submission ids.
 
     The mapping will be from student emails to submission ids. If
@@ -86,7 +86,7 @@ def get_ids_mapping(
         # retrievals failed; do nothing
         return {}
 
-    ids: Dict[str, Optional[int]] = {}
+    ids = {}
 
     if include_all_students:
         success, roster = get_course_roster(course, log=log)
