@@ -38,15 +38,14 @@ optional = true
 [tool.poetry.group.docs.dependencies]
 # as of 2023-01-02, sphinx-rtd-theme v1.1.1 does not allow sphinx v6.0.0,
 # released on 2022-12-29. Thus, I have to use sphinx@^5.3.0
-# sphinx = "^5.3.0"
-sphinx = ">=4.3.0"
+sphinx = "^5.3.0"
 sphinx-autobuild = "^2021.3.14"
-# sphinx-rtd-theme = "^1.1.1"
+sphinx-rtd-theme = "^1.1.1"
 sphinx-toolbox = "^3.2.0"
 
 # https://github.com/readthedocs/sphinx_rtd_theme/issues/1115
-docutils = "<0.17"
-sphinx-rtd-theme = ">=0.5.2"
+# docutils = "<0.17"
+# sphinx-rtd-theme = ">=0.5.2"
 
 [build-system]
 requires = ["poetry-core"]
