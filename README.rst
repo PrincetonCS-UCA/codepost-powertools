@@ -21,7 +21,7 @@ Documentation
 -------------
 
 The documentation can be found
-`here <https://codepost-powertools.readthedocs.io/en/latest/)>`_.
+`here <https://codepost-powertools.readthedocs.io/en/latest/>`_.
 
 .. start-overview
 
