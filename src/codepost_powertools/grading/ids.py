@@ -15,13 +15,13 @@ from codepost_powertools._utils.cli_utils import (
     log_start_end,
 )
 from codepost_powertools._utils.file_io import get_path, save_csv, validate_csv
-from codepost_powertools._utils.types import ParamPathOut, PathLike
 from codepost_powertools.grading._cli_group import group
 from codepost_powertools.utils.codepost_utils import (
     get_course_roster,
     with_course_and_assignment,
 )
 from codepost_powertools.utils.cptypes import Assignment, Course
+from codepost_powertools.utils.types import ParamPathOut, PathLike
 
 # =============================================================================
 
@@ -86,7 +86,7 @@ def get_ids_mapping(
         # retrievals failed; do nothing
         return {}
 
-    ids = {}
+    ids: Dict[str, Optional[int]] = {}
 
     if include_all_students:
         success, roster = get_course_roster(course, log=log)
@@ -114,7 +114,7 @@ def get_ids_mapping(
                 }
             )
 
-    save_data_path = None
+    save_data_path: Optional[PathLike] = None
     if save_file:
         if save_file is True:
             save_data_path = DEFAULT_MAPPING_FILENAME

@@ -9,8 +9,8 @@ from pathlib import Path
 import codepost
 
 from codepost_powertools._utils import handle_error
-from codepost_powertools._utils.types import PathLike
 from codepost_powertools.info import __version__, docs_url, package_name
+from codepost_powertools.utils.types import PathLike
 
 # =============================================================================
 

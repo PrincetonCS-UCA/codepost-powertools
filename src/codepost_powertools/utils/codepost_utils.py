@@ -10,16 +10,16 @@ from typing import Optional
 import codepost
 
 from codepost_powertools._utils import _get_logger, handle_error
-from codepost_powertools._utils.types import (
-    AssignmentArg,
-    CourseArg,
-    SuccessOrNone,
-)
 from codepost_powertools.utils.cptypes import (
     Assignment,
     Course,
     Roster,
     isinstance_cp,
+)
+from codepost_powertools.utils.types import (
+    AssignmentArg,
+    CourseArg,
+    SuccessOrNone,
 )
 
 # =============================================================================

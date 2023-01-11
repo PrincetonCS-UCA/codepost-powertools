@@ -5,18 +5,18 @@ Utilities for reading and writing files.
 # =============================================================================
 
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Any, Iterable, Mapping, Optional
 
 import comma
 
 from codepost_powertools._utils import _get_logger, handle_error
-from codepost_powertools._utils.types import (
+from codepost_powertools.utils.codepost_utils import course_str
+from codepost_powertools.utils.cptypes import Assignment, Course
+from codepost_powertools.utils.types import (
     PathLike,
     SuccessOrErrorMsg,
     SuccessOrNone,
 )
-from codepost_powertools.utils.codepost_utils import course_str
-from codepost_powertools.utils.cptypes import Assignment, Course
 
 # =============================================================================
 
@@ -31,10 +31,10 @@ DEFAULT_EXTS = (
 def get_path(
     start_dir: PathLike = ".",
     *,
-    filename: PathLike = None,
-    course: Course = None,
-    assignment: Assignment = None,
-    folder: PathLike = None,
+    filename: Optional[PathLike] = None,
+    course: Optional[Course] = None,
+    assignment: Optional[Assignment] = None,
+    folder: Optional[PathLike] = None,
     log: bool = False,
 ) -> SuccessOrNone[Path]:
     """Gets the path ``"[start_dir]/[course]/[assignment]/[folder]/[file]"``.

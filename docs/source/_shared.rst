@@ -3,11 +3,11 @@
 .. Shared replacements for all files
 
 .. Powertools types
-.. |PathLike| replace:: :data:`~codepost_powertools._utils.types.PathLike`
-.. |CourseArg| replace:: :data:`~codepost_powertools._utils.types.CourseArg`
-.. |AssignmentArg| replace:: :data:`~codepost_powertools._utils.types.AssignmentArg`
-.. |SuccessOrNone| replace:: :data:`~codepost_powertools._utils.types.SuccessOrNone`
-.. |SuccessOrErrorMsg| replace:: :data:`~codepost_powertools._utils.types.SuccessOrErrorMsg`
+.. |PathLike| replace:: :data:`~codepost_powertools.utils.types.PathLike`
+.. |CourseArg| replace:: :data:`~codepost_powertools.utils.types.CourseArg`
+.. |AssignmentArg| replace:: :data:`~codepost_powertools.utils.types.AssignmentArg`
+.. |SuccessOrNone| replace:: :data:`~codepost_powertools.utils.types.SuccessOrNone`
+.. |SuccessOrErrorMsg| replace:: :data:`~codepost_powertools.utils.types.SuccessOrErrorMsg`
 
 .. codePost types
 .. |Course| replace:: ``Course``
