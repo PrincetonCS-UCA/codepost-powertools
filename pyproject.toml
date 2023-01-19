@@ -2,9 +2,31 @@
 name = "codepost-powertools"
 version = "0.1.0"
 description = "Some helpful codePost tools to aid with grading flow."
-authors = ["Joseph Lou <jdlou@princeton.edu>"]
 license = "MIT"
+authors = ["Joseph Lou <jdlou@princeton.edu>"]
 readme = "README.rst"
+homepage = "https://codepost-powertools.readthedocs.io/en/latest/"
+repository = "https://github.com/PrincetonCS-UCA/codepost-powertools"
+documentation = "https://codepost-powertools.readthedocs.io/en/latest/"
+keywords = [
+  "codepost",
+  "tools",
+  "powertools",
+  "Google Sheets",
+  "Princeton",
+  "COS126",
+]
+classifiers = [
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Education",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Typing :: Typed",
+]
 packages = [{include = "codepost_powertools", from = "src"}]
 
 [tool.poetry.scripts]
