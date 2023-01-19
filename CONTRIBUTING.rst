@@ -14,7 +14,7 @@ Environment
 Setup:
 
 1. Clone the repo:
-  
+
    .. code-block:: bash
 
       $ git clone https://github.com/PrincetonCS-UCA/codepost-powertools.git
@@ -24,13 +24,13 @@ Setup:
 
    .. code-block:: bash
 
-      $ poetry install
-  
+      $ poetry install --with dev
+
    If editing the docs, be sure to include the optional ``docs`` group:
 
    .. code-block:: bash
 
-      $ poetry install --with docs
+      $ poetry install --with dev,docs
 
 To run the Powertools CLI, use the following command:
 
@@ -47,3 +47,4 @@ Alternatively, start the Poetry shell:
 
    $ poetry shell
    (codepost-powertools-py3.X) $ cptools ...
+   (codepost-powertools-py3.X) $ pytest ...
