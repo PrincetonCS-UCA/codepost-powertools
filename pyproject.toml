@@ -21,6 +21,7 @@ loguru = "^0.6.0"
 [tool.poetry.group.dev.dependencies]
 black = "^22.12.0"
 isort = "^5.11.4"
+mypy = "^0.991"
 pylint = "^2.15.9"
 
 [tool.poetry.group.docs]
@@ -46,3 +47,12 @@ profile = "black"
 # Just setting the profile will use the `black` default line length of 88, so
 # need to override line length as well
 line_length = 79
+
+[tool.mypy]
+
+[[tool.mypy.overrides]]
+module = [
+  "codepost.*",
+  "comma.*",
+]
+ignore_missing_imports = true

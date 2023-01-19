@@ -4,11 +4,13 @@ Gets a logger to log messages or do nothing.
 
 # =============================================================================
 
+from __future__ import annotations
+
 import sys
 from typing import Union
 
+import loguru
 from loguru import logger
-from loguru._logger import Logger
 
 # =============================================================================
 
@@ -46,7 +48,7 @@ _null_logger = NullLogger()
 # =============================================================================
 
 
-def _get_logger(log: bool) -> Union[Logger, NullLogger]:
+def _get_logger(log: bool) -> Union[loguru.Logger, NullLogger]:
     """Gets a logger to log messages or do nothing based on `log`.
 
     Args:
