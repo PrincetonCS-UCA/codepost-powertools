@@ -9,7 +9,7 @@ homepage = "https://codepost-powertools.readthedocs.io/en/latest/"
 repository = "https://github.com/PrincetonCS-UCA/codepost-powertools"
 documentation = "https://codepost-powertools.readthedocs.io/en/latest/"
 keywords = [
-  "codepost",
+  "codePost",
   "tools",
   "powertools",
   "Google Sheets",
