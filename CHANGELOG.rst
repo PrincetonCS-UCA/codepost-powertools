@@ -4,6 +4,10 @@ Changelog
 `Unreleased`_
 -------------
 
+* Changed ``get_path()`` to not expect the starting directory to exist
+
+  * If the directory does exist, it is still required to be a directory.
+
 * Moved ``py.typed`` file to ``src/codepost_powertools`` so that it will be
   included in the distribution
 

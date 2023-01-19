@@ -56,24 +56,16 @@ def get_path(
         |SuccessOrNone| [|Path|]: The resulting path.
 
     Raises:
-        FileNotFoundError: If ``start_dir`` does not exist.
-        NotADirectoryError: If ``start_dir`` is not a directory.
+        NotADirectoryError: If ``start_dir`` exists and is not a
+            directory.
 
     .. versionadded:: 0.1.0
     """
     _logger = _get_logger(log)
 
     result = Path(start_dir)
-    if not result.exists():
-        handle_error(
-            log,
-            FileNotFoundError,
-            "Starting directory does not exist: {}",
-            start_dir,
-        )
-        return False, None
-    if not result.is_dir():
-        handle_error(log, NotADirectoryError, str(start_dir))
+    if result.exists() and not result.is_dir():
+        handle_error(log, NotADirectoryError, "Not a directory: {}", start_dir)
         return False, None
 
     if course is not None:
