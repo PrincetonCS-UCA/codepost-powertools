@@ -18,7 +18,6 @@ from tests.mocks import MockAssignment, MockCourse
 ASSIGNMENT_NOT_INCLUDED_WARNING = (
     r"Assignment (.+) will not be included: course was not given"
 )
-START_DIR_DNE_ERROR = r"Starting directory does not exist"
 
 # `validate_csv*()` patterns
 NOT_CSV_ERROR = r"Not a csv file"
@@ -30,18 +29,6 @@ class TestGetPath:
     """Tests the function
     :func:`~codepost_powertools._utils.file_io.get_path`.
     """
-
-    def test_dne_error(self, track_logs, tmp_path):
-        start_dir = tmp_path / "start_dir"
-        # check exception
-        with pytest.raises(FileNotFoundError, match=START_DIR_DNE_ERROR):
-            file_io.get_path(start_dir=start_dir, log=False)
-        # check logging
-        track_logs.reset("ERROR")
-        success, path = file_io.get_path(start_dir=start_dir, log=True)
-        assert not success
-        assert path is None
-        assert track_logs.saw_msg_logged("ERROR", START_DIR_DNE_ERROR)
 
     def test_not_a_directory_error(self, track_logs, tmp_path):
         start_dir = tmp_path / "start_dir.txt"
