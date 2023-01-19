@@ -8,27 +8,27 @@ Info about the ``codepost-powertools`` package.
    fallback).
 
 .. data:: version_info
-   :type: ``Tuple[int, int, int]``
+   :type: Tuple[int, int, int]
 
    The version info as a tuple of ints.
 
 .. data:: __version__
-   :type: |str|
+   :type: str
 
    The version as a string.
 
 .. data:: github_url
-   :type: |str|
+   :type: str
 
    A link to the GitHub repo.
 
 .. data:: docs_url
-   :type: |str|
+   :type: str
 
-   A link to the package documentation.
+   A link to the stable package documentation.
 
 .. data:: docs_version_url
-   :type: |str|
+   :type: str
 
    A link to the package documentation for the current version.
 """
@@ -62,5 +62,5 @@ version_info = tuple(map(int, __version__.split(".")))
 
 github_url = "https://github.com/PrincetonCS-UCA/codepost-powertools"
 _base_doc_url = "https://codepost-powertools.readthedocs.io/en/{version}/"
-docs_url = _base_doc_url.format(version="latest")
+docs_url = _base_doc_url.format(version="stable")
 docs_version_url = _base_doc_url.format(version=__version__)
