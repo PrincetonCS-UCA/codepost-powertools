@@ -151,9 +151,6 @@ class MockGetCourseRoster(MockFunction):
         # mock a success with the given name and period
         return True, MockRoster(id_=id_, students=self._students)
 
-    def get_students(self):
-        return self._students
-
 
 @pytest.fixture(name="mock_get_course_roster")
 def fixture_mock_get_course_roster(request, mock_with_course):
