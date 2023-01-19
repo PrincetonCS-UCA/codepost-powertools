@@ -58,8 +58,7 @@ def with_course(func):
         if not isinstance_cp(course, Course):
             # `course` is a tuple of the course name and period
             name, period = course
-            # if this call fails, `course` will be None, which gets
-            # passed
+            # if this call fails, `course` will be None, which is passed
             _, course = get_course(name, period, log=log)
         return func(course, *args, **kwargs)
 
@@ -88,6 +87,12 @@ def with_course_and_assignment(func):
     If any retrievals are unsuccessful, ``course`` and ``assignment``
     will both be passed as ``None``, which the function should handle
     itself.
+
+    .. note
+       If |Course|_ and |Assignment|_ objects are given, the decorator
+       will simply pass the arguments to the decorated function without
+       checking that the assignment belongs to the course. This is up to
+       the function to ensure.
 
     .. versionadded:: 0.1.0
     """
@@ -119,8 +124,8 @@ def get_course(
 ) -> SuccessOrNone[Course]:
     """Gets a codePost course.
 
-    If there are courses with the same name and period, the first one
-    found is returned.
+    If there are multiple courses with the same name and period, the
+    first one found is returned.
 
     Args:
         name (|str|): The course name.
@@ -140,11 +145,26 @@ def get_course(
 
     _logger.info("Getting course {!r} with period {!r}", name, period)
 
-    # specifying the name and period in `list_available()` works, but it
+    # specifying the name and period in `iter_available()` works, but it
     # ignores empty strings, so do this to handle all cases
-    for course in codepost.course.list_available():
+    found = []
+    for course in codepost.course.iter_available():
         if course.name == name and course.period == period:
-            return True, course
+            found.append(course)
+            if len(found) >= 2:
+                # already found two; don't need to check rest
+                break
+    if len(found) > 0:
+        course = found[0]
+        if len(found) > 1:
+            _logger.warning(
+                "Multiple courses found with name {!r} and period {!r}: "
+                "returning course {}",
+                name,
+                period,
+                course.id,
+            )
+        return True, found[0]
 
     handle_error(
         log,
@@ -156,30 +176,20 @@ def get_course(
     return False, None
 
 
-def course_str(
-    course: Course, *, delim: str = " ", slugify: bool = False
-) -> str:
+def course_str(course: Course, *, delim: str = " ") -> str:
     """Returns a str representation of a course.
 
     Args:
         course (|Course|_): The course.
         delim (|str|): A delimiting string between the name and the
             period.
-        slugify (|bool|): Whether to slugify the result.
 
     Returns:
         |str|: A string representation of the course.
 
-    .. note::
-       The slugification is not very good; it simply converts all spaces
-       to underscores.
-
     .. versionadded:: 0.1.0
     """
-    result = f"{course.name}{delim}{course.period}"
-    if slugify:
-        result = result.replace(" ", "_")
-    return result
+    return f"{course.name}{delim}{course.period}"
 
 
 # =============================================================================
@@ -220,6 +230,9 @@ def get_assignment(
 ) -> SuccessOrNone[Assignment]:
     """Gets a codePost assignment from a course.
 
+    If there are multiple assignments with the same name, the first one
+    found is returned.
+
     Args:
         course (|CourseArg|): The course.
         assignment_name (|str|): The assignment name.
@@ -241,9 +254,23 @@ def get_assignment(
 
     _logger.info("Getting assignment {!r}", assignment_name)
 
+    found = []
     for assignment in course.assignments:
         if assignment.name == assignment_name:
-            return True, assignment
+            found.append(assignment)
+            if len(found) >= 2:
+                # already found two; don't need to check rest
+                break
+    if len(found) > 0:
+        assignment = found[0]
+        if len(found) > 1:
+            _logger.warning(
+                "Multiple assignments found with name {!r}: returning "
+                "assignment {}",
+                assignment_name,
+                assignment.id,
+            )
+        return True, assignment
 
     handle_error(log, ValueError, "Assignment {!r} not found", assignment_name)
     return False, None

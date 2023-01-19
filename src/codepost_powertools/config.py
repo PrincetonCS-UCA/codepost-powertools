@@ -89,7 +89,12 @@ def log_in_codepost(
 
     cp_api_key = config[API_KEY]
 
-    success = codepost.util.config.validate_api_key(cp_api_key)
+    if not isinstance(cp_api_key, str):
+        # if not a str, can't be an api key. passing an unhashable
+        # object to `validate_api_key()` will result in a runtime error
+        success = False
+    else:
+        success = codepost.util.config.validate_api_key(cp_api_key)
     if not success:
         handle_error(
             log, ValueError, "Config file has invalid codePost API key"

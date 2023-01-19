@@ -20,6 +20,8 @@ from codepost_powertools.utils.types import (
 
 # =============================================================================
 
+DEFAULT_OUTPUT_FOLDER = "output"
+
 DEFAULT_EXTS = (
     ".txt",
     ".csv",
@@ -29,7 +31,7 @@ DEFAULT_EXTS = (
 
 
 def get_path(
-    start_dir: PathLike = ".",
+    start_dir: PathLike = DEFAULT_OUTPUT_FOLDER,
     *,
     filename: Optional[PathLike] = None,
     course: Optional[Course] = None,
@@ -39,7 +41,8 @@ def get_path(
 ) -> SuccessOrNone[Path]:
     """Gets the path ``"[start_dir]/[course]/[assignment]/[folder]/[file]"``.
 
-    If ``course`` is None, ``assignment`` will not be included.
+    If any part is not given, it will not be included. If ``course`` is
+    not given, ``assignment`` will not be included either.
 
     Args:
         start_dir (|PathLike|): The starting directory.
@@ -74,7 +77,7 @@ def get_path(
         return False, None
 
     if course is not None:
-        result = result / course_str(course, delim="_", slugify=True)
+        result = result / course_str(course, delim="_")
         if assignment is not None:
             result = result / assignment.name
     elif assignment is not None:

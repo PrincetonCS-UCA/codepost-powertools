@@ -93,7 +93,7 @@ def _format_time(elapsed: float) -> str:
 
 
 def log_start_end(func):
-    """Decorates a `click` command to log the start and end.
+    """Decorates a ``click`` command to log the start and end.
 
     Also logs in to codePost before calling the function, and logs any
     uncaught exceptions during execution.
@@ -141,8 +141,8 @@ def log_start_end(func):
 
 
 def convert_course(func):
-    """Decorates a `click` command to convert the two arguments
-    `course_name` and `course_period` into a CourseArg tuple.
+    """Decorates a ``click`` command to convert the two arguments
+    ``course_name`` and ``course_period`` into a CourseArg tuple.
 
     .. versionadded:: 0.1.0
     """
@@ -158,7 +158,7 @@ def convert_course(func):
 
 
 def cb_validate_csv(ctx, param, value):
-    """A callback to validate that the given filepath has a ".csv"
+    """A callback to validate that the given filepath has a ``".csv"``
     extension.
 
     .. versionadded:: 0.1.0

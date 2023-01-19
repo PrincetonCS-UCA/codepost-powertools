@@ -1,5 +1,5 @@
 """
-Creates a mapping between student emails and submission ids.
+Creates a mapping from student emails to submission ids.
 """
 
 # =============================================================================
@@ -8,7 +8,7 @@ from typing import Dict, Optional, Union
 
 import click
 
-from codepost_powertools._utils import _get_logger
+from codepost_powertools._utils import _get_logger, handle_error
 from codepost_powertools._utils.cli_utils import (
     cb_validate_csv,
     convert_course,
@@ -17,6 +17,7 @@ from codepost_powertools._utils.cli_utils import (
 from codepost_powertools._utils.file_io import get_path, save_csv, validate_csv
 from codepost_powertools.grading._cli_group import group
 from codepost_powertools.utils.codepost_utils import (
+    course_str,
     get_course_roster,
     with_course_and_assignment,
 )
@@ -43,16 +44,15 @@ def get_ids_mapping(
     save_file: Union[bool, PathLike] = False,
     log: bool = False,
 ) -> Dict[str, Optional[int]]:
-    """Returns a mapping between student emails and submission ids.
+    """Returns a mapping from student emails to submission ids.
 
-    The mapping will be from student emails to submission ids. If
-    ``include_all_students`` is True, it will include the entire course
-    roster of students, so the submission id will be None if a student
-    does not have a submission for the given assignment. Otherwise, the
-    only students included will be those with a submission for the given
-    assignment.
+    If ``include_all_students`` is True, the mapping will include the
+    entire course roster of students, so the submission id will be None
+    if a student does not have a submission for the given assignment.
+    Otherwise, the only students included will be those with a
+    submission for the given assignment.
 
-    If ``save_file`` is truthy, a csv file will be saved with the
+    If ``save_file`` is not False, a csv file will be saved with the
     columns ``"submission_id"`` and ``"email"``. Since a submission may
     have multiple students, multiple rows may have the same
     ``"submission_id"`` value. Note that students without a submission
@@ -67,15 +67,17 @@ def get_ids_mapping(
         assignment (|AssignmentArg|): The assignment.
         include_all_students (|bool|): Whether to include the entire
             course roster of students.
-        save_file (|bool| or |PathLike|): The csv file to save the data to.
+        save_file (|bool| or |PathLike|): The csv file to save the data
+            to.
         log (|bool|): Whether to show log messages.
 
     Returns:
         ``Dict[str, int | None]``:
-            The mapping from student emails to submission ids. If the
-            retrievals failed, returns an empty dict.
+            The mapping from student emails to submission ids. If there
+            were any errors, returns an empty dict.
 
     Raises:
+        ValueError: If the assignment does not belong to the course.
         ValueError: If ``filepath`` is not a csv file.
 
     .. versionadded:: 0.1.0
@@ -84,6 +86,16 @@ def get_ids_mapping(
 
     if course is None or assignment is None:
         # retrievals failed; do nothing
+        return {}
+
+    if assignment.course != course.id:
+        handle_error(
+            log,
+            ValueError,
+            "Assignment {!r} does not belong to course {!r}",
+            assignment.name,
+            course_str(course),
+        )
         return {}
 
     ids: Dict[str, Optional[int]] = {}
@@ -106,6 +118,8 @@ def get_ids_mapping(
     for submission in assignment.list_submissions():
         s_id = submission.id
         for student in submission.students:
+            # students can only be associated with one submission, so
+            # this will never overwrite another submission id
             ids[student] = s_id
             csv_data.append(
                 {
@@ -115,15 +129,16 @@ def get_ids_mapping(
             )
 
     save_data_path: Optional[PathLike] = None
-    if save_file:
-        if save_file is True:
-            save_data_path = DEFAULT_MAPPING_FILENAME
+    if save_file is False:
+        pass
+    elif save_file is True:
+        save_data_path = DEFAULT_MAPPING_FILENAME
+    else:
+        success = validate_csv(save_file, log=log)
+        if not success:
+            _logger.warning("Not saving to a file")
         else:
-            success = validate_csv(save_file, log=log)
-            if not success:
-                _logger.warning("Not saving to a file")
-            else:
-                save_data_path = save_file
+            save_data_path = save_file
 
     if save_data_path is not None:
         success, filepath = get_path(
