@@ -1,5 +1,8 @@
 """
 Creates a mapping from student emails to submission ids.
+
+The mapping will be saved at "<OUTPUT>/file", where "file" is the value
+of the "--file" option.
 """
 
 # =============================================================================
@@ -59,7 +62,7 @@ def get_ids_mapping(
     do not appear in this file.
 
     If ``save_file`` is a path, that will be used. Otherwise (if
-    ``save_file`` is True), the default file ``"OUTPUT/ids.csv"`` will
+    ``save_file`` is True), the default file ``"<OUTPUT>/ids.csv"`` will
     be used.
 
     Args:

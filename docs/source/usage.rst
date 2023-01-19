@@ -1,33 +1,5 @@
-codePost Powertools
-===================
-
-.. badges
-
-.. image:: https://readthedocs.org/projects/codepost-powertools/badge/?version=latest
-   :target: https://codepost-powertools.readthedocs.io/en/latest/?badge=latest
-   :alt: Documentation Status
-
-.. |codePost SDK| replace:: ``codePost`` SDK
-.. _codePost SDK: https://github.com/codepost-io/codepost-python
-
-Some helpful codePost tools to aid with grading flow using the |codePost SDK|_!
-
-These tools were originally created to support the grading process for COS126,
-the introductory Computer Science course at Princeton University.
-
-.. end-intro
-
-Documentation
--------------
-
-Please see
-`the documentation <https://codepost-powertools.readthedocs.io/en/latest/>`_
-for more detailed descriptions of the package.
-
-.. The "Usage" page in the documentation is a more detailed version of the
-   below. Note that it does not include it directly, since this file must be
-   PyPi-compliant. See:
-   https://packaging.python.org/en/latest/guides/making-a-pypi-friendly-readme/#validating-restructuredtext-markup
+Usage
+=====
 
 Installation
 ------------
@@ -35,6 +7,10 @@ Installation
 .. code-block:: bash
 
    $ pip install codepost-powertools
+
+Requires Python 3.7.2+.
+
+.. _Root folder:
 
 Root Folder
 -----------
@@ -63,6 +39,10 @@ It is also recommended to use a virtual environment:
    (VENV) GRADING_FOLDER $ cptools --help
    (VENV) GRADING_FOLDER $ python my_script.py
 
+In the rest of the documentation, it is assumed that your current directory is
+this folder and that you have access to the package, either through a global
+installation or through a virtual environment.
+
 Configuration File
 ------------------
 
@@ -79,6 +59,37 @@ Here is what the ``config.yaml`` file may look like:
 
    api_key: YOUR_API_KEY_HERE
 
+.. note::
+   This package *does not* use the default ``codepost-config.yaml`` file that
+   the ``codepost`` package uses. However, you can pass a custom path to your
+   config file to :meth:`~codepost_powertools.log_in_codepost` if you wish.
+
+Output Files
+------------
+
+The following applies to both commands and functions, and they are used
+interchangeably.
+
+For certain commands, an output file will be created. To keep these outputs
+organized, they will be saved according to the following:
+
+1. All output files will be saved in the folder ``output/``.
+2. If the output file pertains to an entire course, it will be saved in the
+   folder ``output/<COURSE>/``, where ``<COURSE>`` is a combination of the
+   course name and period.
+3. If the output file pertains to an assignment, it will be saved in the folder
+   ``output/<COURSE>/<ASSIGNMENT>``, where ``<ASSIGNMENT>`` is the assignment
+   name.
+
+Files will be appropriate named according to the command that generated it. For
+some commands, a file may be generated for each student, in which case an
+appropriately named folder will be created, either under ``output/<COURSE>/``
+or ``output/<COURSE>/<ASSIGNMENT>/``, with each file named for each student.
+
+In the documentation of commands and functions, whenever ``<OUTPUT>/file.csv``
+appears, it means that a file named ``file.csv`` will be saved at the
+appropriate output path, according to the above.
+
 Command Line Interface
 ----------------------
 
@@ -92,7 +103,7 @@ You can access the command-line interface with the ``cptools`` command:
 
      The `codepost_powertools` package on the command line.
 
-Please see the CLI documentation page for more information.
+Please see :doc:`cli` for more information.
 
 Importing in Scripts
 --------------------
@@ -108,4 +119,4 @@ You can import the package in a script:
 
    # Call methods
 
-Please see the "Writing Scripts" documentation page for more information.
+Please see :doc:`scripting` for more information.

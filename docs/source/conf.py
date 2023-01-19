@@ -1,7 +1,9 @@
-# Configuration file for the Sphinx documentation builder.
-#
-# For the full list of built-in configuration values, see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
+"""
+Configuration file for the Sphinx documentation builder.
+
+For the full list of built-in configuration values, see the documentation:
+https://www.sphinx-doc.org/en/master/usage/configuration.html
+"""
 
 import os
 import sys
@@ -12,10 +14,13 @@ import sys
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-# Allow autodoc to find the src files
-sys.path.insert(0, os.path.abspath("../.."))
-# Add helpers folder
-sys.path.insert(0, os.path.abspath("./_helpers"))
+# Insert at front of path
+sys.path[0:0] = [
+    # Allow autodoc to find the src files
+    os.path.abspath("../.."),
+    # Add helpers folder
+    os.path.abspath("./_helpers"),
+]
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information

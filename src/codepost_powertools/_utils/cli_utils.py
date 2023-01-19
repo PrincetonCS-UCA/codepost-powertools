@@ -56,9 +56,13 @@ class NaturalOrderCollection(click.CommandCollection):
 
         .. versionadded:: 0.1.0
         """
+        # In this code, we are assuming that the only sources in this
+        # collection have the type `NaturalOrderGroup`, as defined
+        # above. Therefore, we can assume that each `MultiCommand` has
+        # a `commands` attribute that is a dict.
         return list(
             itertools.chain.from_iterable(
-                multi_command.commands.values()
+                multi_command.commands.values()  # type: ignore[attr-defined]
                 for multi_command in self.sources
             )
         )

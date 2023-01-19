@@ -14,7 +14,7 @@ Table of Contents
 .. toctree::
    :maxdepth: 1
 
-   overview.rst
+   usage.rst
    cli.rst
    scripting.rst
    api.rst
