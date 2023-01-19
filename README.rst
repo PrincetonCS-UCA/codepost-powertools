@@ -23,7 +23,10 @@ Documentation
 The documentation can be found
 `here <https://codepost-powertools.readthedocs.io/en/latest/>`_.
 
-.. start-overview
+.. The "Overview" page in the documentation is a more detailed version of the
+   below. Note that it does not use it directly, since this file must be PyPi-
+   compliant. See:
+   https://packaging.python.org/en/latest/guides/making-a-pypi-friendly-readme/#validating-restructuredtext-markup
 
 Installation
 ------------
@@ -34,6 +37,8 @@ Installation
 
 Usage
 -----
+
+Please see the documentation for a more detailed description of the usage.
 
 You should have a dedicated folder for the usage of these tools, since it
 requires an input config file and outputs files for certain commands /
@@ -49,14 +54,11 @@ functions. It is recommended to use a virtual environment for this:
 
 By default, the package will look for a configuration file called
 ``config.yaml`` that contains a field ``"api_key"`` for your codePost API key.
-See `here <https://docs.codepost.io/docs#2-obtaining-your-codepost-api-key>`_
+See
+`this page <https://docs.codepost.io/docs#2-obtaining-your-codepost-api-key>`_
 for instructions on how to access your codePost API key, as well as more
-information on the config YAML file.
-
-.. note::
-   This package *does not* use the default ``codepost-config.yaml`` file that
-   the ``codepost`` package uses. However, you can pass a custom path to your
-   config file to :meth:`~codepost_powertools.log_in_codepost` if you wish.
+information on the config YAML file. You must have admin access to all the
+courses you wish to access with this package.
 
 Command Line Usage
 ^^^^^^^^^^^^^^^^^^
@@ -71,7 +73,7 @@ You can access the command-line interface with the ``cptools`` command:
 
      The `codepost_powertools` package on the command line.
 
-Please see |CLI docs| for more information.
+Please see the CLI documentation for more information.
 
 Script Usage
 ^^^^^^^^^^^^
@@ -87,10 +89,4 @@ You can import the package in a script:
 
    # Call methods
 
-Please see |Scripting docs| for more information.
-
-.. end-overview
-
-.. When the README is viewed on its own, can't provide a link
-.. |CLI docs| replace:: the CLI documentation
-.. |Scripting docs| replace:: the "Writing Scripts" documentation
+Please see the "Writing Scripts" documentation for more information.
