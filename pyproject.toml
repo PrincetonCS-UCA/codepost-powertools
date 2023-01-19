@@ -23,6 +23,7 @@ black = "^22.12.0"
 isort = "^5.11.4"
 mypy = "^0.991"
 pylint = "^2.15.9"
+pytest = "^7.2.1"
 
 [tool.poetry.group.docs]
 optional = true
@@ -56,3 +57,16 @@ module = [
   "comma.*",
 ]
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+# Can't use import mode "importlib" because test files import helpers
+# See: https://docs.pytest.org/en/latest/explanation/pythonpath.html#import-modes
+addopts = [
+  "--import-mode=prepend",
+  "--strict-markers",
+]
+pythonpath = "src"
+testpaths = "tests"
+markers = [
+  "src_path: provides the path to the src module that needs to be mocked",
+]
