@@ -60,7 +60,7 @@ def get_path(
             directory.
 
     .. versionadded:: 0.1.0
-    .. versionchanged:: 0.1.1
+    .. versionchanged:: 0.2.0
        ``start_dir`` does not need to exist.
     """
     _logger = _get_logger(log)
