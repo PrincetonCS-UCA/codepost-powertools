@@ -40,36 +40,55 @@ Environment
 
       ROOT/codepost-powertools $ poetry install --with dev,docs
 
-Development
------------
+Writing Code
+------------
 
-For commands that require the virtual environment, prefix the command with
-``poetry run``:
+.. |pylint| replace:: ``pylint``
+.. _pylint: https://pylint.pycqa.org/
 
-.. code-block:: bash
+.. |black| replace:: ``black``
+.. _black: https://black.readthedocs.io/
 
-   ROOT/codepost-powertools $ poetry run pytest
-   ROOT/codepost-powertools $ poetry run mypy src
+.. |isort| replace:: ``isort``
+.. _isort: https://pycqa.github.io/isort/
 
-Alternatively, start the Poetry shell:
+* The code is linted with |pylint|_. See the ``.pylintrc`` file for the
+  configuration.
+* The code is formatted with |black|_, using a line length of 79 characters.
+* Imports are formatted with |isort|_, using the ``black`` profile. See the
+  ``pyproject.toml`` file for the configuration.
 
-.. code-block:: bash
+Running Commands
+----------------
 
-   ROOT/codepost-powertools $ poetry shell
-   (codepost-powertools-py3.X) ROOT/codepost-powertools $ pytest
-   (codepost-powertools-py3.X) ROOT/codepost-powertools $ mypy src
+*  For commands that require the virtual environment, prefix the command with
+   ``poetry run``:
 
-To run the Powertools CLI, you must be in the root folder. Since the ``poetry``
-command requires a visible ``pyproject.toml`` file, you will need to activate
-the virtual environment before switching back to the root folder.
+   .. code-block:: bash
 
-.. code-block:: bash
+      ROOT/codepost-powertools $ poetry run pytest
+      ROOT/codepost-powertools $ poetry run mypy src
 
-   ROOT/codepost-powertools $ poetry shell
-   (codepost-powertools-py3.X) ROOT/codepost-powertools $ cd ..
-   (codepost-powertools-py3.X) ROOT $ cptools ...
+   Alternatively, start the Poetry shell:
 
-It might be easier to have a separate terminal tab/window open for this purpose.
+   .. code-block:: bash
+
+      ROOT/codepost-powertools $ poetry shell
+      (codepost-powertools-py3.X) ROOT/codepost-powertools $ pytest
+      (codepost-powertools-py3.X) ROOT/codepost-powertools $ mypy src
+
+*  To run the Powertools CLI, you must be in the root folder. Since the
+   ``poetry`` command requires a visible ``pyproject.toml`` file, you will need
+   to activate the virtual environment before switching back to the root folder.
+
+   .. code-block:: bash
+
+      ROOT/codepost-powertools $ poetry shell
+      (codepost-powertools-py3.X) ROOT/codepost-powertools $ cd ..
+      (codepost-powertools-py3.X) ROOT $ cptools ...
+
+   It might be easier to have a separate terminal tab/window open for this
+   purpose.
 
 Testing
 -------
@@ -80,22 +99,63 @@ Testing
 .. |mypy| replace:: ``mypy``
 .. _mypy: https://mypy.readthedocs.io/
 
-The tests are defined in the ``tests/`` directory using |pytest|_. The
-``pyproject.toml`` file is already configured to run the tests with the command:
+.. |coverage| replace:: ``coverage``
+.. _coverage: https://coverage.readthedocs.io/
+
+*  The tests are defined in the ``tests/`` directory using |pytest|_. The
+   ``pyproject.toml`` file is already configured to run the tests with the
+   command:
+
+   .. code-block:: bash
+
+      ROOT/codepost-powertools $ poetry run pytest
+      # Or, with the virtual environment activated:
+      (codepost-powertools-py3.X) ROOT/codepost-powertools $ pytest
+
+*  The codebase can be statically type-checked using |mypy|_:
+
+   .. code-block:: bash
+
+      ROOT/codepost-powertools $ poetry run mypy src
+      # Or, with the virtual environment activated:
+      (codepost-powertools-py3.X) ROOT/codepost-powertools $ mypy src
+
+   Note that there are a few expected warnings that are explained at
+   :doc:`contributing/mypy-warnings`.
+
+*  Test the test coverage with |coverage|_:
+
+   .. code-block:: bash
+
+      ROOT/codepost-powertools $ poetry run coverage run -m pytest
+      # Or, with the virtual environment activated:
+      (codepost-powertools-py3.X) ROOT/codepost-powertools $ coverage run -m pytest
+
+   Note that there are no tests written for the CLI, so files pertaining to that
+   will not have full coverage.
+
+Documentation
+-------------
+
+.. |Sphinx| replace:: Sphinx
+.. _Sphinx: https://www.sphinx-doc.org/en/master/
+
+.. |Read the Docs| replace:: Read the Docs
+.. _Read the Docs: https://docs.readthedocs.io/
+
+The documentation is written in the ``docs/`` folder using |Sphinx|_ and hosted
+on |Read the Docs|_.
+
+To build the documentation, run the following:
 
 .. code-block:: bash
 
-   ROOT/codepost-powertools $ poetry run pytest
-   # Or, with the virtual environment activated:
-   (codepost-powertools-py3.X) ROOT/codepost-powertools $ pytest
+   (codepost-powertools-py3.X) ROOT/codepost-powertools $ cd docs
+   (codepost-powertools-py3.X) ROOT/codepost-powertools/docs $ make html
 
-The codebase is also statically type-checked using |mypy|_:
+To activate a local server at http://localhost:8000/ that auto-updates on
+changes, run the following:
 
 .. code-block:: bash
 
-   ROOT/codepost-powertools $ poetry run mypy src
-   # Or, with the virtual environment activated:
-   (codepost-powertools-py3.X) ROOT/codepost-powertools $ mypy src
-
-Note that there are a few expected warnings that are explained at
-:doc:`contributing/mypy-warnings`.
+   (codepost-powertools-py3.X) ROOT/codepost-powertools/docs $ make livehtml

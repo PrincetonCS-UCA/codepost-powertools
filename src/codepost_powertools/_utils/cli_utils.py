@@ -33,6 +33,14 @@ class NaturalOrderGroup(click.Group):
     def list_commands(self, ctx: click.Context) -> List[str]:
         return list(self.commands.keys())
 
+    def list_command_objs(self) -> List[click.Command]:
+        """Returns a list of all the command objects, as opposed to only
+        the command names, as ``list_commands()`` does.
+
+        .. versionadded:: 0.1.0
+        """
+        return list(self.commands.values())
+
 
 class NaturalOrderCollection(click.CommandCollection):
     """A command collection that lists commands in the given groups
@@ -50,22 +58,17 @@ class NaturalOrderCollection(click.CommandCollection):
             )
         )
 
-    def list_command_objs(self) -> List[click.Command]:
-        """Returns a list of all the command objects, as opposed to only
-        the command names, as ``list_commands()`` does.
+    def list_groups(self) -> List[NaturalOrderGroup]:
+        """Returns a list of all the sources of type
+        ``NaturalOrderGroup``.
 
         .. versionadded:: 0.1.0
         """
-        # In this code, we are assuming that the only sources in this
-        # collection have the type `NaturalOrderGroup`, as defined
-        # above. Therefore, we can assume that each `MultiCommand` has
-        # a `commands` attribute that is a dict.
-        return list(
-            itertools.chain.from_iterable(
-                multi_command.commands.values()  # type: ignore[attr-defined]
-                for multi_command in self.sources
-            )
-        )
+        groups = []
+        for multi_command in self.sources:
+            if isinstance(multi_command, NaturalOrderGroup):
+                groups.append(multi_command)
+        return groups
 
 
 def get_help_str(command_title: str, command: click.Command) -> str:

@@ -1,5 +1,11 @@
 """
 Private utilities.
+
+.. warning::
+   Utilities in this subpackage do not need to maintain backward
+   compatibility with previous versions, as they are private utilities
+   meant to be used as internal helpers. Therefore, behavior of these
+   functions may change, even between minor or patch versions.
 """
 
 # =============================================================================

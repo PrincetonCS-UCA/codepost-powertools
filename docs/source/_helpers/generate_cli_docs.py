@@ -3,7 +3,10 @@ Automatically generates ``cptools`` cli help docs.
 """
 
 import textwrap
+from datetime import datetime
 from pathlib import Path
+
+DATETIME_FORMAT = "%Y-%m-%d %H:%M"
 
 
 def generate_cli_docs():
@@ -19,27 +22,46 @@ def generate_cli_docs():
         "",
     ]
 
-    def add_command_help(name, command):
-        lines = []
-        # add the header
+    def add_command_help(name, command, section_char="^"):
         title = f"``{name}`` command"
-        lines.append(title)
-        lines.append("-" * len(title))
-        lines.append("")
-        # add the help string
-        lines.append(".. code-block:: text")
-        lines.append("")
         help_str = get_help_str(name, command)
-        # prefix each line with 3 spaces
-        lines.append(textwrap.indent(help_str, " " * 3))
-        lines.append("")
-        help_file_lines.extend(lines)
+        help_file_lines.extend(
+            [
+                # add the header
+                title,
+                section_char * len(title),
+                "",
+                # add the help str
+                ".. code-block:: text",
+                "",
+                # prefix each line with 3 spaces
+                textwrap.indent(help_str, " " * 3),
+                "",
+            ]
+        )
 
     # add the top level command
-    add_command_help(cli.name, cli)
+    add_command_help(cli.name, cli, section_char="-")
     # add all commands
-    for cmd in cli.list_command_objs():
-        add_command_help(f"{cli.name} {cmd.name}", cmd)
+    for group in cli.list_groups():
+        # add group header
+        title = f"{group.name} Group"
+        help_file_lines.extend(
+            [
+                title,
+                "-" * len(title),
+                "",
+            ]
+        )
+        for cmd in group.list_command_objs():
+            add_command_help(f"{cli.name} {cmd.name}", cmd)
+
+    help_file_lines.extend(
+        [
+            f"*Last updated: {datetime.now().strftime(DATETIME_FORMAT)}*",
+            "",
+        ]
+    )
 
     return "\n".join(help_file_lines)
 

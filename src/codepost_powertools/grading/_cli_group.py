@@ -8,4 +8,4 @@ from codepost_powertools._utils.cli_utils import NaturalOrderGroup
 
 # =============================================================================
 
-group = NaturalOrderGroup()
+group = NaturalOrderGroup(name="Grading")
