@@ -3,10 +3,7 @@ Automatically generates ``cptools`` cli help docs.
 """
 
 import textwrap
-from datetime import datetime
 from pathlib import Path
-
-DATETIME_FORMAT = "%Y-%m-%d %H:%M"
 
 
 def generate_cli_docs():
@@ -55,13 +52,6 @@ def generate_cli_docs():
         )
         for cmd in group.list_command_objs():
             add_command_help(f"{cli.name} {cmd.name}", cmd)
-
-    help_file_lines.extend(
-        [
-            f"*Last updated: {datetime.now().strftime(DATETIME_FORMAT)}*",
-            "",
-        ]
-    )
 
     return "\n".join(help_file_lines)
 
