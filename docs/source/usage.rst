@@ -81,8 +81,8 @@ organized, they will be saved according to the following:
    ``output/<COURSE>/<ASSIGNMENT>``, where ``<ASSIGNMENT>`` is the assignment
    name.
 
-Files will be appropriate named according to the command that generated it. For
-some commands, a file may be generated for each student, in which case an
+Files will be appropriately named according to the command that generated it.
+For some commands, a file may be generated for each student, in which case an
 appropriately named folder will be created, either under ``output/<COURSE>/``
 or ``output/<COURSE>/<ASSIGNMENT>/``, with each file named for each student.
 
