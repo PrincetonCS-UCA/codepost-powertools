@@ -230,9 +230,6 @@ def get_assignment(
 ) -> SuccessOrNone[Assignment]:
     """Gets a codePost assignment from a course.
 
-    If there are multiple assignments with the same name, the first one
-    found is returned.
-
     Args:
         course (|CourseArg|): The course.
         assignment_name (|str|): The assignment name.
@@ -246,6 +243,9 @@ def get_assignment(
         ValueError: If the assignment is not found.
 
     .. versionadded:: 0.1.0
+    .. versionchanged:: 0.2.0
+       codePost does not allow multiple assignments to have the same
+       name, so the extra checks for that were removed.
     """
     _logger = _get_logger(log)
 
@@ -254,23 +254,9 @@ def get_assignment(
 
     _logger.info("Getting assignment {!r}", assignment_name)
 
-    found = []
     for assignment in course.assignments:
         if assignment.name == assignment_name:
-            found.append(assignment)
-            if len(found) >= 2:
-                # already found two; don't need to check rest
-                break
-    if len(found) > 0:
-        assignment = found[0]
-        if len(found) > 1:
-            _logger.warning(
-                "Multiple assignments found with name {!r}: returning "
-                "assignment {}",
-                assignment_name,
-                assignment.id,
-            )
-        return True, assignment
+            return True, assignment
 
     handle_error(log, ValueError, "Assignment {!r} not found", assignment_name)
     return False, None
