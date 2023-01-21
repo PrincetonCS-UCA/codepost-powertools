@@ -79,7 +79,7 @@ def multi_scope_fixture(*, name, scopes, default_scope=None):
 
     Args:
         name (str): The base name of the fixture.
-        scopes (Sequence[str]): The scopes to give to the fixture.
+        scopes (Iterable[str]): The scopes to give to the fixture.
             Each scoped fixture will have the name "{scope}_{name}".
         default_scope (Optional[str]): The default scope.
             The fixture with this scope will simply have the given name.

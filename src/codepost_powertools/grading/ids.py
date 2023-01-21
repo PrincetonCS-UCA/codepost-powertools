@@ -176,4 +176,7 @@ def get_ids_mapping(
 @log_start_end
 @convert_course
 def ids_cmd(**kwargs):
+    """
+    .. versionadded:: 0.1.0
+    """
     get_ids_mapping(**kwargs)

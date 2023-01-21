@@ -67,10 +67,10 @@ SubmissionTest = _add_type("SubmissionTest", SubmissionTests)
 
 
 def isinstance_cp(obj, cp_type):
-    """Returns whether `obj` is of type `cp_type`.
+    """Returns whether ``obj`` is of type ``cp_type``.
 
-    `typing.NewType` objects cannot be used in `isinstance()`, so this
-    function provides a workaround.
+    ``typing.NewType`` objects cannot be used in ``isinstance()``, so
+    this function provides a workaround.
 
     See: https://github.com/python/mypy/issues/3325#issuecomment-299546004
     """
