@@ -8,7 +8,7 @@ from codepost_powertools.info import __version__  # isort: skip
 
 # =============================================================================
 
-from codepost_powertools import grading
+from codepost_powertools import grading, rubric
 
 # Implicitly run the config file
 from codepost_powertools.config import log_in_codepost
@@ -18,4 +18,5 @@ from codepost_powertools.config import log_in_codepost
 __all__ = (
     "log_in_codepost",
     "grading",
+    "rubric",
 )

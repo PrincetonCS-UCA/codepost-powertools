@@ -6,7 +6,7 @@ The `codepost_powertools` package on the command line.
 
 import click
 
-from codepost_powertools import grading
+from codepost_powertools import grading, rubric
 from codepost_powertools._utils.cli_utils import NaturalOrderCollection
 from codepost_powertools.info import __version__, package_name
 
@@ -16,11 +16,17 @@ _cli_name = "cptools"
 
 # =============================================================================
 
-# pylint: disable=protected-access
-# Access the `_cli_group.group` group of each submodule
 cli = NaturalOrderCollection(
     name=_cli_name,
-    sources=[group._cli_group.group for group in (grading,)],
+    sources=[
+        # pylint: disable=protected-access
+        # Access the `_cli_group.group` group of each submodule
+        group._cli_group.group
+        for group in (
+            grading,
+            rubric,
+        )
+    ],
     help=__doc__,
 )
 
