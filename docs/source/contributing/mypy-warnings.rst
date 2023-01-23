@@ -5,15 +5,15 @@
 
 This page explains some ``mypy`` warnings in the code that can be ignored.
 
-Last updated: 2023-01-18, v0.1.0.
+Last updated: 2023-01-23, v0.2.0.
 
 * ``arg-type`` errors in:
-  
+
   * ``src/codepost_powertools/_utils/file_io.py``
   * ``src/codepost_powertools/grading/ids.py``
-  
+
   .. code-block:: text
-     
+
      [file_io.py:137] Argument 3 to "handle_error" has incompatible type "Optional[str]"; expected "str"
      [ids.py:151] Argument 2 to "save_csv" has incompatible type "Optional[Path]"; expected "Union[PathLike[Any], str]"
 
@@ -23,23 +23,10 @@ Last updated: 2023-01-18, v0.1.0.
   still exactly and distinctly defined. Thus, if there is an ``if`` statement
   checking the value of ``success``, the other value's type is definitely known
   within the body. However, ``mypy`` does not recognize this, and gives errors.
-  
+
   Additional conditionals can be put into the ``if`` statements to also check if
   the other value is ``None``, but that would be redundant and only for the
   purpose of satisfying the type-checker. We have decided that that is not a
   good enough reason to change the code, and instead this error will remain.
   However, this means that more instances of this error will likely come up as
   more code is written.
-
-* ``arg-type`` errors in ``src/codepost_powertools/utils/types.py``:
-
-  .. code-block:: text
-
-     [types.py:82] Argument 3 to "Path" has incompatible type "**Dict[str, object]"; expected "bool"
-     [types.py:82] Argument 3 to "Path" has incompatible type "**Dict[str, object]"; expected "Optional[Type[Any]]"
-     [types.py:84] Argument 3 to "Path" has incompatible type "**Dict[str, object]"; expected "bool"
-     [types.py:84] Argument 3 to "Path" has incompatible type "**Dict[str, object]"; expected "Optional[Type[Any]]"
-
-  These errors occur due to kwargs expansions to the ``click.Path`` constructor.
-  The kwargs are shared, and replacing them with their individual arguments do
-  not yield any type errors.

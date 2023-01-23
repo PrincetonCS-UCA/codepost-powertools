@@ -4,8 +4,8 @@ Holds the CLI rubric group.
 
 # =============================================================================
 
-from codepost_powertools._utils.cli_utils import NaturalOrderGroup
+from codepost_powertools._utils.cli_utils import SectionGroup
 
 # =============================================================================
 
-group = NaturalOrderGroup(name="Rubric")
+group = SectionGroup(name="Rubric")

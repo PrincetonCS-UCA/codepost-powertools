@@ -48,10 +48,9 @@ Type definitions and aliases.
 # =============================================================================
 
 from os import PathLike as os_PathLike
-from pathlib import Path
 from typing import Literal, Tuple, TypeVar, Union
 
-import click
+import cloup
 
 from codepost_powertools.utils.cptypes import Assignment, Course
 
@@ -77,8 +76,7 @@ SuccessOrErrorMsg = Union[
 
 # =============================================================================
 
-_SHARED_KWARGS = {"file_okay": True, "dir_okay": False, "path_type": Path}
 # An input filepath given on the command line
-ParamPathIn = click.Path(exists=True, readable=True, **_SHARED_KWARGS)
+ParamPathIn = cloup.file_path(exists=True, readable=True)
 # An output filepath given on the command line
-ParamPathOut = click.Path(exists=False, writable=True, **_SHARED_KWARGS)
+ParamPathOut = cloup.file_path(exists=False, writable=True)

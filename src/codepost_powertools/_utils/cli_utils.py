@@ -5,12 +5,12 @@ Utilities for the command-line interface.
 # =============================================================================
 
 import functools
-import itertools
 import sys
 import time
 from typing import List
 
 import click
+import cloup
 
 from codepost_powertools._utils._logger import _get_logger
 from codepost_powertools._utils.file_io import validate_csv_silent
@@ -24,51 +24,31 @@ logger = _get_logger(log=True)
 # =============================================================================
 
 
-class NaturalOrderGroup(click.Group):
-    """A group that lists commands in the given order.
+class SectionGroup(click.Group):
+    """A ``click.Group`` that can be changed into a ``cloup.Section``.
 
-    .. versionadded:: 0.1.0
+    .. versionchanged:: 0.2.0
     """
 
-    def list_commands(self, ctx: click.Context) -> List[str]:
-        return list(self.commands.keys())
+    def as_section(self) -> cloup.Section:
+        """Returns this group as a ``cloup.Section``.
 
-    def list_command_objs(self) -> List[click.Command]:
-        """Returns a list of all the command objects, as opposed to only
-        the command names, as ``list_commands()`` does.
-
-        .. versionadded:: 0.1.0
+        .. versionadded:: 0.2.0
         """
-        return list(self.commands.values())
-
-
-class NaturalOrderCollection(click.CommandCollection):
-    """A command collection that lists commands in the given groups
-    order.
-
-    .. versionadded:: 0.1.0
-    """
-
-    def list_commands(self, ctx: click.Context) -> List[str]:
-        # flatten the commands from each source
-        return list(
-            itertools.chain.from_iterable(
-                multi_command.list_commands(ctx)
-                for multi_command in self.sources
-            )
+        return cloup.Section(
+            f"{self.name} Commands", list(self.commands.values())
         )
 
-    def list_groups(self) -> List[NaturalOrderGroup]:
-        """Returns a list of all the sources of type
-        ``NaturalOrderGroup``.
 
-        .. versionadded:: 0.1.0
-        """
-        groups = []
-        for multi_command in self.sources:
-            if isinstance(multi_command, NaturalOrderGroup):
-                groups.append(multi_command)
-        return groups
+def get_all_sections(
+    group: cloup.Group,
+) -> List[cloup.Section]:
+    """Returns all the sections in the given group.
+
+    .. versionadded:: 0.2.0
+    """
+    with cloup.Context(group) as ctx:
+        return group.list_sections(ctx)
 
 
 def get_help_str(command_title: str, command: click.Command) -> str:
@@ -76,8 +56,7 @@ def get_help_str(command_title: str, command: click.Command) -> str:
 
     .. versionadded:: 0.1.0
     """
-    # Reference: https://stackoverflow.com/a/43178373
-    with click.Context(command, info_name=command_title) as ctx:
+    with cloup.Context(command, info_name=command_title) as ctx:
         return command.get_help(ctx)
 
 

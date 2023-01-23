@@ -10,7 +10,10 @@ def generate_cli_docs():
     try:
         # pylint: disable=import-outside-toplevel
         from codepost_powertools.__main__ import cli
-        from codepost_powertools._utils.cli_utils import get_help_str
+        from codepost_powertools._utils.cli_utils import (
+            get_all_sections,
+            get_help_str,
+        )
     except ImportError:
         return "Sorry, could not generate CLI help text."
 
@@ -40,9 +43,12 @@ def generate_cli_docs():
     # add the top level command
     add_command_help(cli.name, cli, section_char="-")
     # add all commands
-    for group in cli.list_groups():
+    for section in get_all_sections(cli):
+        commands = section.list_commands()
+        if len(commands) == 0:
+            continue
         # add group header
-        title = f"{group.name} Group"
+        title = section.title
         help_file_lines.extend(
             [
                 title,
@@ -50,8 +56,9 @@ def generate_cli_docs():
                 "",
             ]
         )
-        for cmd in group.list_command_objs():
-            add_command_help(f"{cli.name} {cmd.name}", cmd)
+        # add group commands
+        for cmd_name, command in commands:
+            add_command_help(f"{cli.name} {cmd_name}", command)
 
     return "\n".join(help_file_lines)
 

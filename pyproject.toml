@@ -39,6 +39,7 @@ codepost = "^0.2.29"
 comma = "^0.5.4"
 importlib-metadata = {version = ">=1.0", python = "<3.8"}
 loguru = "^0.6.0"
+cloup = "^2.0.0"
 
 [tool.poetry.group.dev]
 optional = true

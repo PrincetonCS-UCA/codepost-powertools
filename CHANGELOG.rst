@@ -11,6 +11,8 @@ Changelog
 * Moved ``py.typed`` file to ``src/codepost_powertools`` so that it will be
   included in the distribution
 
+* Better CLI help output with ``cloup``
+
 `v0.1.0`_ (2023-01-18)
 ----------------------
 

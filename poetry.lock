@@ -352,6 +352,22 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 
 [[package]]
+name = "cloup"
+version = "2.0.0.post1"
+description = "Adds features to Click: option groups, constraints, subcommand sections and help themes."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "cloup-2.0.0.post1-py2.py3-none-any.whl", hash = "sha256:da37c0a940e066c4c2e17c351448e797333926c0e00a15139dbf57c2c4fab4d6"},
+    {file = "cloup-2.0.0.post1.tar.gz", hash = "sha256:1430c9075062e09cb64cd84ab7afe5d5acd28adf561d6ab3109eb1975bbd7b6b"},
+]
+
+[package.dependencies]
+click = ">=8.0,<9.0"
+typing-extensions = {version = "*", markers = "python_version <= \"3.8\""}
+
+[[package]]
 name = "codepost"
 version = "0.2.29"
 description = "Python bindings for the codePost API"
@@ -1997,4 +2013,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.2"
-content-hash = "aa8e98bfbc86efdd443be41c287f30c5d3a9226b8318770b3e6fa694184ae54d"
+content-hash = "46046e4e5f428dab19306f128545bd161708044065062ed4b689a1c9688f0d04"
