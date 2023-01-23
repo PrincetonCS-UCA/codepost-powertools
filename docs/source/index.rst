@@ -9,14 +9,31 @@
 *Current release:* |release|
 
 Table of Contents
-=================
+-----------------
+
+* :doc:`usage`
+* :doc:`scripting`
+
+.. Hidden TOC trees for side nav
 
 .. toctree::
-   :maxdepth: 1
+   :caption: User Guide
+   :hidden:
 
    usage.rst
-   cli.rst
    scripting.rst
+
+.. toctree::
+   :caption: Reference
+   :maxdepth: 1
+   :hidden:
+
    api.rst
+   cli.rst
+
+.. toctree::
+   :caption: Project
+   :hidden:
+
    changelog.rst
    contributing.rst
