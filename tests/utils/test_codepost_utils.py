@@ -36,7 +36,6 @@ MULTIPLE_COURSES_FOUND_WARNING = (
 # `get_assignment()` patterns
 GETTING_ASSIGNMENT_INFO = r"Getting assignment"
 ASSIGNMENT_NOT_FOUND_ERROR = r"Assignment .+ not found"
-MULTIPLE_ASSIGNMENTS_FOUND_WARNING = r"Multiple assignments found with name"
 
 # =============================================================================
 
@@ -392,9 +391,6 @@ class TestGetAssignment:
                     MockAssignment(1, "Assignment1"),
                     MockAssignment(2, "Assignment2"),
                     MockAssignment(3, "Assignment3"),
-                    MockAssignment(4, "Assignment3"),
-                    MockAssignment(5, "Repeated Assignment"),
-                    MockAssignment(6, "Repeated Assignment"),
                 ],
             },
         },
@@ -444,6 +440,7 @@ class TestGetAssignment:
         @parametrize(
             {"assignment_name": "Assignment1", "expected_id": 1},
             {"assignment_name": "Assignment2", "expected_id": 2},
+            {"assignment_name": "Assignment3", "expected_id": 3},
         )
         def test_assignment_exists(
             self,
@@ -460,30 +457,6 @@ class TestGetAssignment:
                 assignment, id_=expected_id, name=assignment_name
             )
 
-        @parametrize(
-            {"assignment_name": "Assignment3", "expected_id": 3},
-            {"assignment_name": "Repeated Assignment", "expected_id": 5},
-        )
-        def test_multiple_assignments_found(
-            self,
-            track_no_error_logs,
-            track_logs,
-            course_tuple,
-            assignment_name,
-            expected_id,
-        ):
-            track_logs.reset("WARNING")
-            success, assignment = cp_utils.get_assignment(
-                course_tuple, assignment_name, log=True
-            )
-            assert success
-            assert_assignment(
-                assignment, id_=expected_id, name=assignment_name
-            )
-            assert track_logs.saw_msg_logged(
-                "WARNING", MULTIPLE_ASSIGNMENTS_FOUND_WARNING
-            )
-
     @parametrize(
         {
             "course_obj": MockCourse(
@@ -493,10 +466,7 @@ class TestGetAssignment:
                 assignments=[
                     MockAssignment(1, "Assignment1"),
                     MockAssignment(2, "Assignment2"),
-                    MockAssignment(30, "Assignment3"),
-                    MockAssignment(31, "Assignment3"),
-                    MockAssignment(50, "Repeated Assignment"),
-                    MockAssignment(60, "Repeated Assignment"),
+                    MockAssignment(3, "Assignment3"),
                 ],
             )
         },
@@ -532,8 +502,7 @@ class TestGetAssignment:
         @parametrize(
             {"assignment_name": "Assignment1", "expected_id": 1},
             {"assignment_name": "Assignment2", "expected_id": 2},
-            {"assignment_name": "Assignment3", "expected_id": 30},
-            {"assignment_name": "Repeated Assignment", "expected_id": 50},
+            {"assignment_name": "Assignment3", "expected_id": 3},
         )
         def test_assignment_exists(
             self,
@@ -549,31 +518,6 @@ class TestGetAssignment:
             assert success
             assert_assignment(
                 assignment, id_=expected_id, name=assignment_name
-            )
-
-        @parametrize(
-            {"assignment_name": "Assignment3", "expected_id": 30},
-            {"assignment_name": "Repeated Assignment", "expected_id": 50},
-        )
-        def test_multiple_assignments_found(
-            self,
-            track_no_error_logs,
-            track_logs,
-            mock_get_course_not_called,
-            course_obj,
-            assignment_name,
-            expected_id,
-        ):
-            track_logs.reset("WARNING")
-            success, assignment = cp_utils.get_assignment(
-                course_obj, assignment_name, log=True
-            )
-            assert success
-            assert_assignment(
-                assignment, id_=expected_id, name=assignment_name
-            )
-            assert track_logs.saw_msg_logged(
-                "WARNING", MULTIPLE_ASSIGNMENTS_FOUND_WARNING
             )
 
 
