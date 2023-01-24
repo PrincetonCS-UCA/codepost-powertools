@@ -31,6 +31,19 @@ def generate_cli_docs():
                 title,
                 section_char * len(title),
                 "",
+            ]
+        )
+        paired_func = getattr(command, "paired_func", None)
+        if paired_func is not None:
+            # add link to paired function
+            help_file_lines.extend(
+                [
+                    f"See the paired function {paired_func}.",
+                    "",
+                ]
+            )
+        help_file_lines.extend(
+            [
                 # add the help str
                 ".. code-block:: text",
                 "",

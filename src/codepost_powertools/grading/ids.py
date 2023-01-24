@@ -159,7 +159,11 @@ def get_ids_mapping(
 # =============================================================================
 
 
-@group.command("ids", help=__doc__)
+@group.command(
+    "ids",
+    help=__doc__,
+    paired_func=":func:`codepost_powertools.grading.get_ids_mapping`",
+)
 @click.argument("course_name", type=str, required=True)
 @click.argument("course_period", type=str, required=True)
 @click.argument("assignment", type=str, required=True)

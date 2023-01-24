@@ -27,8 +27,37 @@ logger = _get_logger(log=True)
 class SectionGroup(click.Group):
     """A ``click.Group`` that can be changed into a ``cloup.Section``.
 
-    .. versionchanged:: 0.2.0
+    .. versionadded:: 0.2.0
     """
+
+    def command(self, *args, **kwargs):
+        """A decorator that adds a command to this group.
+
+        Note that this decorator must be called as a method, as opposed
+        to the parent method, which may be called directly as a
+        decorator.
+
+        Examples:
+
+        .. code-block:: python
+
+           @group.command()
+           @group.command(*args, **kwargs)
+           @group.command  # INCORRECT
+
+        .. versionadded:: 0.2.0
+        """
+        paired_func = kwargs.pop("paired_func", None)
+
+        # `cmd` is a decorator that produces a command
+        create_cmd = super().command(*args, **kwargs)
+
+        def wrapper(func):
+            cmd = create_cmd(func)  # pylint: disable=not-callable
+            cmd.paired_func = paired_func
+            return cmd
+
+        return wrapper
 
     def as_section(self) -> cloup.Section:
         """Returns this group as a ``cloup.Section``.
