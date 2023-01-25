@@ -5,6 +5,7 @@ Utilities involving the codePost SDK.
 # =============================================================================
 
 import functools
+import re
 from typing import Optional
 
 import codepost
@@ -25,11 +26,19 @@ from codepost_powertools.utils.types import (
 # =============================================================================
 
 __all__ = (
+    "TIER_FORMAT",
+    "TIER_PATTERN",
     "get_course",
     "course_str",
     "get_course_roster",
     "get_assignment",
 )
+
+# =============================================================================
+
+# Tier format constants (specific to Princeton COS126)
+TIER_FORMAT = "\\[T{tier}\\] {text}"
+TIER_PATTERN = re.compile(r"\\\[T(?P<tier>\d+)\\] (?P<text>.*)")
 
 # =============================================================================
 

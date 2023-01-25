@@ -4,6 +4,8 @@ Utilities for the command-line interface.
 
 # =============================================================================
 
+from __future__ import annotations
+
 import functools
 import sys
 import time
@@ -92,19 +94,74 @@ def get_help_str(command_title: str, command: click.Command) -> str:
 # =============================================================================
 
 
-def _format_time(elapsed: float) -> str:
-    """Formats the given number of seconds into a readable time str.
+class Stopwatch:
+    """Keeps track of an amount of elapsed time.
 
-    .. versionadded:: 0.1.0
+    .. versionadded: 0.2.0
     """
 
-    if elapsed < 60:
-        return f"{elapsed:.2f} sec"
-    minutes, seconds = divmod(elapsed, 60)
-    if minutes < 60:
-        return f"{minutes:.0f} min, {seconds:.2f} sec"
-    hours, minutes = divmod(minutes, 60)
-    return f"{hours:.0f} hr, {minutes:.0f} min, {seconds:.2f} sec"
+    def __init__(self):
+        self._start = None
+
+    def start(self) -> Stopwatch:
+        """Starts this Stopwatch. Returns itself for chaining.
+
+        .. versionadded: 0.2.0
+        """
+        self._start = time.time()
+        return self
+
+    def elapsed(self) -> float:
+        """Returns the time elapsed in seconds.
+        Returns -1 if the Stopwatch hasn't been started.
+
+        Returns:
+            |float|: The elapsed time in seconds.
+
+        .. versionadded: 0.2.0
+        """
+        if self._start is None:
+            return -1
+        return time.time() - self._start
+
+    def elapsed_str(self) -> str:
+        """Returns the time elapsed as a formatted string.
+        Returns the empty string if the Stopwatch hasn't been started.
+
+        Returns:
+            |str|: The formatted elapsed time.
+
+        .. versionadded: 0.2.0
+        """
+        if self._start is None:
+            return ""
+        return Stopwatch.format_time(self.elapsed())
+
+    @staticmethod
+    def format_time(elapsed: float) -> str:
+        """Formats the given number of seconds into a readable time str.
+
+        Args:
+            elapsed (|float|): The elapsed time.
+
+        Returns:
+            |str|: The formatted time.
+
+        .. versionadded:: 0.2.0
+           This used to be a private function ``_format_time()`` in
+           version 0.1.0.
+        """
+
+        if elapsed < 60:
+            return f"{elapsed:.2f} sec"
+        minutes, seconds = divmod(elapsed, 60)
+        if minutes < 60:
+            return f"{minutes:.0f} min, {seconds:.2f} sec"
+        hours, minutes = divmod(minutes, 60)
+        return f"{hours:.0f} hr, {minutes:.0f} min, {seconds:.2f} sec"
+
+
+# =============================================================================
 
 
 def log_start_end(func):
@@ -120,7 +177,7 @@ def log_start_end(func):
     @click.pass_context
     def log(ctx, **kwargs):
         logger.trace("Start")
-        start = time.time()
+        stopwatch = Stopwatch().start()
 
         had_error = False
 
@@ -141,10 +198,8 @@ def log_start_end(func):
                 # also pass `log=True`
                 ctx.invoke(func, **kwargs, log=True)
 
-        end = time.time()
         logger.trace("Done")
-
-        logger.trace("Total time: {}", _format_time(end - start))
+        logger.trace("Total time: {}", stopwatch.elapsed_str())
 
         if had_error:
             sys.exit(1)
@@ -182,3 +237,25 @@ def cb_validate_csv(ctx, param, value):
     if not success:
         raise click.BadParameter(error_msg)
     return value
+
+
+# =============================================================================
+
+
+def click_flag(*args, **kwargs):
+    """A decorator to create a flag option.
+
+    .. versionadded:: 0.2.0
+    """
+
+    kwargs["is_flag"] = True
+    # set `default` to `False` if both not given
+    if "default" not in kwargs and "flag_value" not in kwargs:
+        kwargs["default"] = False
+    # set `default` and `flag_value` as opposites if only one given
+    if "default" in kwargs and "flag_value" not in kwargs:
+        kwargs["flag_value"] = not kwargs["default"]
+    elif "flag_value" in kwargs and "default" not in kwargs:
+        kwargs["default"] = not kwargs["flag_value"]
+
+    return click.option(*args, **kwargs)

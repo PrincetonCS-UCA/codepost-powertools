@@ -64,6 +64,101 @@ Here is what the ``config.yaml`` file may look like:
    the ``codepost`` package uses. However, you can pass a custom path to your
    config file to :meth:`~codepost_powertools.log_in_codepost` if you wish.
 
+Google Sheets OAuth Credentials
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. |gspread package| replace:: ``gspread`` package
+.. _gspread package: https://docs.gspread.org/en/latest/
+
+This package interacts with Google Sheets through the |gspread package|_. You
+can enable an OAuth Client to create, access, and edit spreadsheets using your
+account.
+
+To enable an OAuth Client, follow these steps:
+
+1.  Go to the `Google Developers Console <https://console.cloud.google.com/>`_.
+2.  Log in with the Google account you want to use with the OAuth Client. All
+    created spreadsheets will be owned by this account in Google Drive, and all
+    edits will be done with this account.
+3.  In the top left, click the "Select a project" dropdown. Here, either select
+    a project to use, or create a new one. The name and organization can be
+    anything.
+
+    .. note::
+       If your account belongs to an organization, such as school accounts, this
+       may not work depending on your workspace settings. If that happens, use a
+       personal Google account with no organization.
+
+4.  Go to the `API Library <https://console.cloud.google.com/apis/library>`_.
+5.  In the search bar, search for "Google Drive API", select it, and enable it.
+6.  Go back to the API Library. In the search bar, search for "Google Sheets
+    API", select it, and enable it.
+7.  Go to the
+    `OAuth Consent Screen <https://console.cloud.google.com/apis/credentials/consent>`_
+    tab.
+8.  If prompted, select "External" for the User Type.
+9.  On the "App Information" page, enter an app name. Select your email address
+    for the support email. Scroll down to the bottom and enter your email
+    address for the developer contact information. Click "Save and Continue".
+10. On the "Scopes" page, click "Save and Continue".
+11. On the "Test Users" page, add your email address as a user. Click "Save and
+    Continue".
+12. On the summary page, scroll to the bottom and click "Back to Dashboard".
+13. Go to the `Credentials <https://console.cloud.google.com/apis/credentials>`_
+    tab.
+14. At the top of the page, select "+ Create credentials" > "OAuth client ID".
+15. For the application type, select "Desktop app". Name your credentials. Click
+    "Create".
+16. At the popup, click "Download JSON".
+
+    Alternatively, on the Credentials page, locate the credentials you just
+    created in the "OAuth 2.0 Client IDs" table. Click the download button at
+    the end of the row.
+17. Rename the file to ``client_credentials.json`` and place it in your root
+    folder.
+
+.. note::
+   The user interface of the Google Developers Console may be different when
+   you're reading this. If it is, please submit an issue or pull request on the
+   `GitHub repository <https://github.com/PrincetonCS-UCA/codepost-powertools/issues>`_.
+
+.. note::
+   The script will have access to all the Google Spreadsheets accessible by the
+   account you use, including spreadsheets shared with you. While running the
+   script, only spreadsheets that you specify will be accessed, so be sure to
+   use the proper spreadsheets.
+
+OAuth Client Authorization
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When using the package, if you've never authorized the app or if your
+authorization has expired, you'll be given a URL in the console for you to visit
+in order to authorize the app. Once that is done, a file named
+``client_authorized.json`` will be created next to ``client_credentials.json``.
+This will allow authentication to be cached for successive calls.
+
+When you go to the URL, choose the account that you used to set up the OAuth
+Client. It will then ask for access to your Google Account. Check the two
+options "See, edit, create, and delete all of your Google Drive files" (from the
+"Google Drive API") and "See, edit, create, and delete all of your Google Sheets
+spreadsheets" (from the "Google Sheets API"). At the bottom, click "Continue".
+You will be redirected to a page that says "The authentication flow has
+completed. You may close this window." At this point, the script or command
+should continue running.
+
+.. warning::
+   The credentials file and generated authorized client file contain sensitive
+   data. Be sure to not share it with others. If you believe your information
+   has been compromised, you will need to delete this OAuth Client and create a
+   new one, as your Client ID and secret cannot be regenerated.
+
+.. note::
+   Visiting the authorization URL may show you a warning that the application
+   has not been verified by Google. You may safely ignore this by clicking on
+   "Advanced" and "Go to <project name> (unsafe)". If you are unsure about this,
+   you can opt to use a service account instead. However, this is not yet
+   supported.
+
 Output Files
 ------------
 

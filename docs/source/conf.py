@@ -77,6 +77,7 @@ html_static_path = ["_static"]
 # -- Extensions --------------------------------------------------------------
 
 # Autodoc
+autodoc_class_signature = "separated"
 autodoc_member_order = "bysource"
 # To avoid evaluated type aliases (of which there are a lot), remove
 # type hints from the signature
@@ -85,6 +86,7 @@ autodoc_typehints = "description"
 # Intersphinx
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
+    "gspread": ("https://docs.gspread.org/en/latest/", None),
 }
 
 # Napoleon
