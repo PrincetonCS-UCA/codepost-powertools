@@ -40,6 +40,13 @@ AUTHORIZED_CLIENT_FILENAME = "client_authorized.json"
 
 # =============================================================================
 
+# To not require callers to use the authentication function, we will
+# save a global client object that can be used in any function that
+# needs it.
+_GLOBAL_CLIENT = None
+
+# =============================================================================
+
 
 def _local_server_flow(client_config, scopes, port=0):
     """Runs an OAuth flow exactly like
@@ -86,6 +93,8 @@ def authenticate_client(
 
     .. versionadded:: 0.2.0
     """
+    global _GLOBAL_CLIENT  # pylint: disable=global-statement
+
     _logger = _get_logger(log)
 
     _logger.info("Authenticating OAuth Client")
@@ -132,6 +141,7 @@ def authenticate_client(
         # try again
         client = gspread.oauth(**oauth_kwargs)
 
+    _GLOBAL_CLIENT = client
     return True, client
 
 
@@ -139,7 +149,7 @@ def authenticate_client(
 
 
 def open_spreadsheet(
-    client: gspread.Client, sheet_name: str, *, log: bool = False
+    sheet_name: str, *, log: bool = False
 ) -> SuccessOrNone[gspread.Spreadsheet]:
     """Opens a Google Spreadsheet.
 
@@ -147,7 +157,6 @@ def open_spreadsheet(
     found is returned.
 
     Args:
-        client (|gspread Client|): The client.
         sheet_name (|str|): The name of the sheet to open.
         log (|bool|): Whether to show log messages.
 
@@ -160,12 +169,17 @@ def open_spreadsheet(
 
     .. versionadded:: 0.2.0
     """
+    if _GLOBAL_CLIENT is None:
+        success, _ = authenticate_client(log=log)
+        if not success:
+            return False, None
+
     _logger = _get_logger(log)
 
     _logger.info("Opening spreadsheet {!r}", sheet_name)
 
     try:
-        return True, client.open(sheet_name)
+        return True, _GLOBAL_CLIENT.open(sheet_name)
     except gspread.SpreadsheetNotFound:
         pass
     handle_error(

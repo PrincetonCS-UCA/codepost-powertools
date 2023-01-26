@@ -31,7 +31,6 @@ from codepost_powertools._utils.gspread_utils import (
     Color,
     Worksheet,
     add_worksheet,
-    authenticate_client,
     col_index_to_letter,
     open_spreadsheet,
 )
@@ -759,17 +758,17 @@ def export_rubric(
         "Found {}", with_pluralized(len(valid_assignments), "assignment")
     )
 
-    success, client = authenticate_client(log=log)
-    if not success:
-        return successes
-
-    success, sheet = open_spreadsheet(client, sheet_name, log=log)
+    success, spreadsheet = open_spreadsheet(sheet_name, log=log)
     if not success:
         return successes
 
     # get worksheets for each assignment
     worksheets = _get_worksheets(
-        sheet, valid_assignments.values(), wipe=wipe, replace=replace, log=log
+        spreadsheet,
+        valid_assignments.values(),
+        wipe=wipe,
+        replace=replace,
+        log=log,
     )
 
     _logger.info("Exporting rubrics to spreadsheet")
