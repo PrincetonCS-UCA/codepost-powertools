@@ -18,11 +18,11 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Iterable,
     List,
     Literal,
     Mapping,
     Optional,
-    Sequence,
     Tuple,
     Union,
 )
@@ -496,13 +496,13 @@ class Worksheet:
         *,
         freeze_rows: Optional[int] = None,
         freeze_cols: Optional[int] = None,
-        hide_rows: Optional[Sequence[Union[str, int]]] = None,
-        hide_cols: Optional[Sequence[Union[str, int]]] = None,
-        row_heights: Optional[Sequence[Tuple[Union[str, int], int]]] = None,
-        col_widths: Optional[Sequence[Tuple[Union[str, int], int]]] = None,
-        range_formats: Optional[Sequence[Tuple[str, Mapping]]] = None,
-        number_formats: Optional[Sequence[Tuple[str, Mapping]]] = None,
-        merge_ranges: Optional[Sequence[str]] = None,
+        hide_rows: Optional[Iterable[Union[str, int]]] = None,
+        hide_cols: Optional[Iterable[Union[str, int]]] = None,
+        row_heights: Optional[Iterable[Tuple[Union[str, int], int]]] = None,
+        col_widths: Optional[Iterable[Tuple[Union[str, int], int]]] = None,
+        range_formats: Optional[Iterable[Tuple[str, Mapping]]] = None,
+        number_formats: Optional[Iterable[Tuple[str, Mapping]]] = None,
+        merge_ranges: Optional[Iterable[str]] = None,
         update: bool = False,
     ):
         """Formats the worksheet in bulk.
@@ -520,18 +520,18 @@ class Worksheet:
         Args:
             freeze_rows (|int|): The number of rows to freeze.
             freeze_cols (|int|): The number of columns to freeze.
-            hide_rows (``Sequence[Union[str, int]]``): The rows to hide.
-            hide_cols (``Sequence[Union[str, int]]``): The columns to
+            hide_rows (``Iterable[Union[str, int]]``): The rows to hide.
+            hide_cols (``Iterable[Union[str, int]]``): The columns to
                 hide.
-            row_heights (``Sequence[Tuple[Union[str, int], int]]``):
+            row_heights (``Iterable[Tuple[Union[str, int], int]]``):
                 The row heights to set.
-            col_widths (``Sequence[Tuple[Union[str, int], int]]``):
+            col_widths (``Iterable[Tuple[Union[str, int], int]]``):
                 The column widths to set.
-            range_formats (``Sequence[Tuple[str, Mapping]]``): Pairs of
+            range_formats (``Iterable[Tuple[str, Mapping]]``): Pairs of
                 ranges and kwargs for :meth:`format_cell`.
-            number_formats (``Sequence[Tuple[str, Mapping]]``): Pairs of
+            number_formats (``Iterable[Tuple[str, Mapping]]``): Pairs of
                 ranges and kwargs for :meth:`format_number_cell`.
-            merge_ranges (``Sequence[str]``): The ranges to merge.
+            merge_ranges (``Iterable[str]``): The ranges to merge.
             update (|bool|): Whether to update the worksheet.
 
         See the other methods for possible exceptions raised.
