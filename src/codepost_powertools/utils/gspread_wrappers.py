@@ -1,5 +1,5 @@
 """
-A wrapper class around |gspread Worksheet|.
+Wrapper classes around |gspread Spreadsheet| and |gspread Worksheet|.
 """
 # pylint: disable=too-many-public-methods
 
@@ -9,6 +9,10 @@ A wrapper class around |gspread Worksheet|.
 
 # Note that functions and methods in this module raise all exceptions,
 # regardless of whether ``log`` is True or not.
+
+# Note that this module does not get tested, since mostly everything is
+# either a thin wrapper around a ``gspread`` function or class, or makes
+# direct requests to the Google Sheets API.
 
 # =============================================================================
 
@@ -36,14 +40,15 @@ from typing_extensions import NotRequired, Required, TypedDict
 
 __all__ = (
     "Color",
-    "Worksheet",
+    "Spreadsheet",
     "col_letter_to_index",
     "col_index_to_letter",
+    "Worksheet",
 )
 
 # =============================================================================
 
-MAX_RGB = 256
+MAX_RGB = 255
 
 #: An RGB tuple representing a color.
 Color = Tuple[int, int, int]
@@ -55,6 +60,85 @@ def _get_color_dict(color: Color) -> Dict[str, float]:
         key: color_val / MAX_RGB
         for key, color_val in zip(("red", "green", "blue"), color, strict=True)
     }
+
+
+# =============================================================================
+
+
+def _set_worksheet_title(func: Callable, title: str, *args, **kwargs):
+    """Calls the given function with the given title and args.
+
+    If a ``gspread.exceptions.APIError`` occurs due to a duplicate
+    title, an incrementing value will be appended to the end of the
+    title, and the function will be called until there is no longer a
+    conflict.
+
+    .. versionadded:: 0.2.0
+    """
+    try:
+        return func(title=title, *args, **kwargs)
+    except gspread.exceptions.APIError as ex:
+        error = ex.response.json()["error"]
+        if error["code"] == 400 and error["status"] == "INVALID_ARGUMENT":
+            # error["message"] == (
+            #     "Invalid requests[0].addSheet: A sheet with the name "
+            #     '"{title}" already exists. Please enter another name.'
+            # )
+            pass
+        else:
+            raise
+    count = 1
+    while True:
+        try:
+            return func(title=f"{title} {count}", *args, **kwargs)
+        except gspread.exceptions.APIError:
+            count += 1
+
+
+# =============================================================================
+
+
+class Spreadsheet(gspread.Spreadsheet):
+    """A wrapper class around |gspread Worksheet|.
+
+    The :meth:`add_worksheet` method will keep trying to add a worksheet
+    until there isn't a title conflict anymore.
+
+    .. versionadded:: 0.2.0
+    """
+
+    def add_worksheet(
+        self,
+        title: str = "Sheet",
+        *,
+        rows: int = 1,
+        cols: int = 1,
+        index: Optional[int] = None,
+    ) -> gspread.Worksheet:
+        """Adds a new worksheet to the spreadsheet.
+
+        If ``index`` is given, the worksheet will be inserted before the
+        given 0-indexed index. For example, ``index = 0`` will insert
+        the worksheet at the very beginning, and ``index = 1`` will
+        insert the worksheet between the first and second sheets. If
+        ``index`` is not given, the worksheet will be added at the end.
+
+        Args:
+            title (|str|): The title of the worksheet.
+            rows (|int|): The number of rows.
+            cols (|int|): The number of columns.
+            index (|int|): The index position to insert the worksheet
+                (0-indexed).
+
+        Returns:
+            |gspread Worksheet|: The worksheet.
+
+        .. versionadded:: 0.2.0
+        """
+        # pylint: disable=arguments-differ
+        return _set_worksheet_title(
+            super().add_worksheet, title, rows=rows, cols=cols, index=index
+        )
 
 
 # =============================================================================
@@ -104,42 +188,10 @@ def col_index_to_letter(col: int) -> str:
 # =============================================================================
 
 
-def _set_worksheet_title(func: Callable, title: str, *args, **kwargs):
-    """Calls the given function with the given title and args.
-
-    If a ``gspread.exceptions.APIError`` occurs, it is assumed to mean
-    that a worksheet with the given title already exists. An
-    incrementing value will be appended to the end of the title, and the
-    function will be called until there is no longer a conflict.
-
-    .. versionadded:: 0.2.0
-    """
-    try:
-        return func(title=title, *args, **kwargs)
-    except gspread.exceptions.APIError:
-        # expected error:
-        # gspread.exceptions.APIError {
-        #     "code": 400,
-        #     "message": (
-        #         "Invalid requests[0].addSheet: A sheet with the name "
-        #         '"{title}" already exists. Please enter another name.'
-        #     ),
-        #     "status": "INVALID_ARGUMENT",
-        # }
-        pass
-    count = 1
-    while True:
-        try:
-            return func(title=f"{title} {count}", *args, **kwargs)
-        except gspread.exceptions.APIError:
-            count += 1
-
-
-# =============================================================================
-
-
 class Worksheet:
     """A wrapper class around |gspread Worksheet|.
+
+    .. versionadded:: 0.2.0
 
     .. data:: DEFAULT_ROW_HEIGHT
        :type: int
@@ -158,8 +210,6 @@ class Worksheet:
           the "Resize Column" popup says the default is 120.
 
     .. |DimensionRange| replace:: ``DimensionRange``
-
-    .. versionadded:: 0.2.0
     """
 
     DEFAULT_ROW_HEIGHT: int = 21
@@ -267,7 +317,7 @@ class Worksheet:
         grid: Dict[str, int] = gridrange(range_a1)
         dim_range: Worksheet.DimensionRange = {
             "sheet_id": self._id,
-            "dimension": dim.upper() + "S",  # type: ignore
+            "dimension": dim.upper() + "S",  # type: ignore[typeddict-item]
         }
 
         dim_title = dim.title()

@@ -2,6 +2,7 @@ API Reference
 =============
 
 .. toctree::
+   :maxdepth: 3
 
    api/top-level.rst
    api/groups.rst

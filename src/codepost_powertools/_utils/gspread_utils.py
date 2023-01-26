@@ -5,32 +5,31 @@ Utilities involving the ``gspread`` package.
 # =============================================================================
 
 from pathlib import Path
-from typing import Optional
 
 import google.auth.exceptions
 import gspread
 from google_auth_oauthlib.flow import InstalledAppFlow
 
 from codepost_powertools._utils import _get_logger, handle_error
-from codepost_powertools.utils.types import PathLike, SuccessOrNone
-from codepost_powertools.utils.worksheet import (
+from codepost_powertools.utils.gspread_wrappers import (
     Color,
+    Spreadsheet,
     Worksheet,
-    _set_worksheet_title,
     col_index_to_letter,
     col_letter_to_index,
 )
+from codepost_powertools.utils.types import PathLike, SuccessOrNone
 
 # =============================================================================
 
 __all__ = (
-    "Worksheet",
     "Color",
+    "Spreadsheet",
     "col_letter_to_index",
     "col_index_to_letter",
+    "Worksheet",
     "authenticate_client",
     "open_spreadsheet",
-    "add_worksheet",
 )
 
 # =============================================================================
@@ -150,7 +149,7 @@ def authenticate_client(
 
 def open_spreadsheet(
     sheet_name: str, *, log: bool = False
-) -> SuccessOrNone[gspread.Spreadsheet]:
+) -> SuccessOrNone[Spreadsheet]:
     """Opens a Google Spreadsheet.
 
     If there are multiple spreadsheets with the same name, the first one
@@ -161,7 +160,7 @@ def open_spreadsheet(
         log (|bool|): Whether to show log messages.
 
     Returns:
-        |SuccessOrNone| [|gspread Spreadsheet|]: The spreadsheet.
+        |SuccessOrNone| [|Spreadsheet|]: The spreadsheet.
 
     Raises:
         gspread.exceptions.SpreadsheetNotFound: If the spreadsheet was
@@ -179,7 +178,14 @@ def open_spreadsheet(
     _logger.info("Opening spreadsheet {!r}", sheet_name)
 
     try:
-        return True, _GLOBAL_CLIENT.open(sheet_name)
+        # `authenticate_client()` sets `_GLOBAL_CLIENT`, so it can't be
+        # None at this point
+        spreadsheet = _GLOBAL_CLIENT.open(  # type: ignore[union-attr]
+            sheet_name
+        )
+        # ugly hack, but use wrapper class instead of the gspread class
+        spreadsheet.__class__ = Spreadsheet
+        return True, spreadsheet
     except gspread.SpreadsheetNotFound:
         pass
     handle_error(
@@ -189,38 +195,3 @@ def open_spreadsheet(
         sheet_name,
     )
     return False, None
-
-
-# =============================================================================
-
-
-def add_worksheet(
-    sheet: gspread.Spreadsheet,
-    title: str = "Sheet",
-    *,
-    rows: int = 1,
-    cols: int = 1,
-    index: Optional[int] = None,
-) -> gspread.Worksheet:
-    """Adds a worksheet to the given spreadsheet.
-
-    If a worksheet already exists with the name ``title``, a number will
-    be appended to the end of the title, then incremented until there is
-    no longer a conflict.
-
-    Args:
-        sheet (|gspread Spreadsheet|): The spreadsheet.
-        title (|str|): The worksheet title.
-        rows (|int|): The number of rows.
-        cols (|int|): The number of columns.
-        index (|int|): The index where the worksheet should go.
-            If not given, it is added to the end.
-
-    Returns:
-        |gspread Worksheet|: The worksheet.
-
-    .. versionadded:: 0.2.0
-    """
-    return _set_worksheet_title(
-        sheet.add_worksheet, title, rows=rows, cols=cols, index=index
-    )

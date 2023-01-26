@@ -16,13 +16,8 @@ codePost Utilities
 
 gspread Utilities
 -----------------
-.. only include docstring
-.. automodule:: codepost_powertools._utils.gspread_utils
-
-   All row and column numbers are 1-indexed.
-
-.. autodata:: codepost_powertools.utils.worksheet.Color
-
-.. autoclass:: codepost_powertools.utils.worksheet.Worksheet
+.. automodule:: codepost_powertools.utils.gspread_wrappers
    :members:
    :exclude-members: DimensionRange
+
+   .. exclude Worksheet.DimensionRange because it's an internal helper type

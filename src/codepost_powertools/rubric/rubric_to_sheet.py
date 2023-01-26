@@ -18,7 +18,6 @@ from typing import Any, Dict, Iterable, List, Literal, Optional, Tuple, Union
 
 import click
 import cloup
-import gspread
 
 from codepost_powertools._utils import _get_logger, with_pluralized
 from codepost_powertools._utils.cli_utils import (
@@ -29,8 +28,8 @@ from codepost_powertools._utils.cli_utils import (
 )
 from codepost_powertools._utils.gspread_utils import (
     Color,
+    Spreadsheet,
     Worksheet,
-    add_worksheet,
     col_index_to_letter,
     open_spreadsheet,
 )
@@ -347,7 +346,7 @@ def _assignment_worksheet_format_kwargs(headers: Headers) -> Dict[str, Any]:
 
 
 def _get_worksheets(
-    sheet: gspread.Spreadsheet,
+    sheet: Spreadsheet,
     assignments: Iterable[Assignment],
     *,
     wipe: bool = False,
@@ -364,7 +363,7 @@ def _get_worksheets(
     will be created with number suffixes to avoid naming conflicts.
 
     Args:
-        sheet (|gspread Spreadsheet|): The spreadsheet.
+        sheet (|Spreadsheet|): The spreadsheet.
         assignments (``Iterable`` [|Assignment|_]): The assignments.
         wipe (|bool|): Whether to wipe all the existing worksheets.
         replace (|bool|): Whether to replace the existing assignment
@@ -383,7 +382,7 @@ def _get_worksheets(
     existing = sheet.worksheets()
     # add a temporary worksheet so we don't have to deal with edge case
     # of removing all the sheets (which is an error)
-    temp = add_worksheet(sheet)
+    temp = sheet.add_worksheet(title="__temp")
 
     existing_assignment_worksheets = {}
 
@@ -425,12 +424,12 @@ def _get_worksheets(
             sheet.del_worksheet(worksheet)
             # add new worksheet in same place
             this_worksheet = Worksheet(
-                add_worksheet(sheet, title=title, index=index)
+                sheet.add_worksheet(title=title, index=index)
             )
         else:
             created += 1
             # create new worksheet
-            this_worksheet = Worksheet(add_worksheet(sheet, title=a_name))
+            this_worksheet = Worksheet(sheet.add_worksheet(title=a_name))
 
         # format the sheet with default font
         this_worksheet.format_cell("A1", font_family="Fira Code", update=True)

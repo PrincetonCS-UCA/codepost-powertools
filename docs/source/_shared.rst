@@ -28,10 +28,12 @@
 .. gspread types (with intersphinx)
 .. |gspread Client| replace:: :class:`gspread.Client`
 .. |gspread Spreadsheet| replace:: :class:`gspread.spreadsheet.Spreadsheet`
+.. spreadsheet wrapper type
+.. |Spreadsheet| replace:: :class:`~codepost_powertools.utils.gspread_wrappers.Spreadsheet`
 .. |gspread Worksheet| replace:: :class:`gspread.worksheet.Worksheet`
 .. worksheet wrapper type
-.. |Worksheet| replace:: :class:`~codepost_powertools.utils.worksheet.Worksheet`
+.. |Worksheet| replace:: :class:`~codepost_powertools.utils.gspread_wrappers.Worksheet`
 .. |gspread Cell| replace:: :class:`gspread.cell.Cell`
 
 .. Miscellaneous
-.. |Color| replace:: :data:`~codepost_powertools.utils.worksheet.Color`
+.. |Color| replace:: :data:`~codepost_powertools.utils.gspread_wrappers.Color`
