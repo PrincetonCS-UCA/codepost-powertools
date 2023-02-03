@@ -16,8 +16,13 @@ codePost Utilities
 
 gspread Utilities
 -----------------
+
+.. toctree::
+   :hidden:
+
+   utils/sheets_api_helpers
+
 .. automodule:: codepost_powertools.utils.gspread_wrappers
    :members:
-   :exclude-members: DimensionRange
 
-   .. exclude Worksheet.DimensionRange because it's an internal helper type
+   This module uses :doc:`Sheets API helper objects</api/utils/sheets_api_helpers>`.

@@ -27,7 +27,6 @@ from codepost_powertools._utils.cli_utils import (
     log_start_end,
 )
 from codepost_powertools._utils.gspread_utils import (
-    Color,
     Spreadsheet,
     Worksheet,
     col_index_to_letter,
@@ -36,6 +35,13 @@ from codepost_powertools._utils.gspread_utils import (
 from codepost_powertools.rubric._cli_group import group
 from codepost_powertools.utils.codepost_utils import TIER_PATTERN, with_course
 from codepost_powertools.utils.cptypes import Assignment, Course
+from codepost_powertools.utils.sheets_api import (
+    Color,
+    HorizontalAlign,
+    NumberFormatType,
+    VerticalAlign,
+    WrapStrategy,
+)
 
 # =============================================================================
 
@@ -43,8 +49,8 @@ __all__ = ("export_rubric",)
 
 # =============================================================================
 
-GREEN: Color = (109, 177, 84)
-WHITE: Color = (255, 255, 255)
+GREEN = Color.ints(109, 177, 84)
+WHITE = Color.ints(255, 255, 255)
 
 # =============================================================================
 
@@ -280,7 +286,12 @@ def _assignment_worksheet_format_kwargs(headers: Headers) -> Dict[str, Any]:
         "freeze_cols": headers.index("COMMENT_NAME"),
         "col_widths": headers.col_widths,
         "range_formats": [
-            # header: everything after ids column
+            # ids column
+            (
+                headers.col_letter("IDS"),
+                {"vertical_align": VerticalAlign.MIDDLE},
+            ),
+            # header: everything to the right of ids column
             (
                 headers.col_letter("IDS", offset=1, row=f"1:{HEADER_ROW}"),
                 {
@@ -293,14 +304,9 @@ def _assignment_worksheet_format_kwargs(headers: Headers) -> Dict[str, Any]:
                 headers.col_letter(
                     "IDS", offset=1, row=f"{HEADER_ROW}:{HEADER_ROW}"
                 ),
-                {"text_align": "CENTER"},
+                {"text_align": HorizontalAlign.CENTER},
             ),
-            # ids column
-            (
-                headers.col_letter("IDS"),
-                {"vertical_align": "MIDDLE"},
-            ),
-            # rubric content (everything after the headers)
+            # rubric content (everything below the headers)
             (
                 headers.col_range(
                     "IDS",
@@ -308,7 +314,10 @@ def _assignment_worksheet_format_kwargs(headers: Headers) -> Dict[str, Any]:
                     offset=1,
                     row=f"{HEADER_ROW + 1}:",
                 ),
-                {"vertical_align": "MIDDLE", "wrap": "WRAP"},
+                {
+                    "vertical_align": VerticalAlign.MIDDLE,
+                    "wrap": WrapStrategy.WRAP,
+                },
             ),
         ],
         "hide_cols": [
@@ -322,7 +331,10 @@ def _assignment_worksheet_format_kwargs(headers: Headers) -> Dict[str, Any]:
     if headers.include_instances:
         # merge instance upvotes/downvotes headers and add
         # percentage formatting
-        PERCENT_FORMAT = {"fmt_type": "PERCENT", "pattern": "0.0%"}
+        PERCENT_FORMAT = {
+            "fmt_type": NumberFormatType.PERCENT,
+            "pattern": "0.0%",
+        }
         merge_ranges = []
         number_formats = []
         for header in ("UPVOTES", "DOWNVOTES"):
@@ -557,14 +569,14 @@ class InstanceCounts:
     .. versionadded:: 0.2.0
     """
 
-    #: The id of the comment these counts are for.
     comment_id: int
-    #: The total instances.
+    """The id of the comment these counts are for."""
     total: int = 0
-    #: The number of upvotes this comment got.
+    """The total instances."""
     upvotes: int = 0
-    #: The number of downvotes this comment got.
+    """The number of upvotes this comment got."""
     downvotes: int = 0
+    """The number of downvotes this comment got."""
 
     @property
     def upvote_percent(self) -> float:

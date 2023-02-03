@@ -35,5 +35,10 @@
 .. |Worksheet| replace:: :class:`~codepost_powertools.utils.gspread_wrappers.Worksheet`
 .. |gspread Cell| replace:: :class:`gspread.cell.Cell`
 
-.. Miscellaneous
-.. |Color| replace:: :data:`~codepost_powertools.utils.gspread_wrappers.Color`
+.. Google Sheets API helpers
+.. |Color| replace:: :data:`~codepost_powertools.utils.sheets_api.Color`
+.. |HorizontalAlign| replace:: :data:`~codepost_powertools.utils.sheets_api.HorizontalAlign`
+.. |MergeType| replace:: :data:`~codepost_powertools.utils.sheets_api.MergeType`
+.. |NumberFormatType| replace:: :data:`~codepost_powertools.utils.sheets_api.NumberFormatType`
+.. |VerticalAlign| replace:: :data:`~codepost_powertools.utils.sheets_api.VerticalAlign`
+.. |WrapStrategy| replace:: :data:`~codepost_powertools.utils.sheets_api.WrapStrategy`

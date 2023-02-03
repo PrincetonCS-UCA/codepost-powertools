@@ -3,10 +3,6 @@ Wrapper classes around |gspread Spreadsheet| and |gspread Worksheet|.
 """
 # pylint: disable=too-many-public-methods
 
-# Spreadsheet batch updating:
-# https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/batchUpdate
-# https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/request
-
 # Note that functions and methods in this module raise all exceptions,
 # regardless of whether ``log`` is True or not.
 
@@ -18,28 +14,34 @@ Wrapper classes around |gspread Spreadsheet| and |gspread Worksheet|.
 
 from __future__ import annotations
 
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    List,
-    Literal,
-    Mapping,
-    Optional,
-    Tuple,
-    Union,
-)
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, Union
 
 import gspread
-from gspread.utils import a1_range_to_grid_range as gridrange
 from gspread.utils import column_letter_to_index, rowcol_to_a1
-from typing_extensions import NotRequired, Required, TypedDict
+
+from codepost_powertools.utils.sheets_api import (
+    CellData,
+    CellFormat,
+    Color,
+    ColorStyle,
+    DimensionProperties,
+    DimensionRange,
+    ExtendedValue,
+    GridProperties,
+    GridRange,
+    HorizontalAlign,
+    MergeType,
+    NumberFormat,
+    NumberFormatType,
+    SheetProperties,
+    TextFormat,
+    VerticalAlign,
+    WrapStrategy,
+)
 
 # =============================================================================
 
 __all__ = (
-    "Color",
     "Spreadsheet",
     "col_letter_to_index",
     "col_index_to_letter",
@@ -48,64 +50,66 @@ __all__ = (
 
 # =============================================================================
 
-MAX_RGB = 255
-
-#: An RGB tuple representing a color.
-Color = Tuple[int, int, int]
-
-
-def _get_color_dict(color: Color) -> Dict[str, float]:
-    """Returns a dict representing the given color on a 0-1 scale."""
-    return {
-        key: color_val / MAX_RGB
-        for key, color_val in zip(("red", "green", "blue"), color, strict=True)
-    }
-
-
-# =============================================================================
-
-
-def _set_worksheet_title(func: Callable, title: str, *args, **kwargs):
-    """Calls the given function with the given title and args.
-
-    If a ``gspread.exceptions.APIError`` occurs due to a duplicate
-    title, an incrementing value will be appended to the end of the
-    title, and the function will be called until there is no longer a
-    conflict.
-
-    .. versionadded:: 0.2.0
-    """
-    try:
-        return func(title=title, *args, **kwargs)
-    except gspread.exceptions.APIError as ex:
-        error = ex.response.json()["error"]
-        if error["code"] == 400 and error["status"] == "INVALID_ARGUMENT":
-            # error["message"] == (
-            #     "Invalid requests[0].addSheet: A sheet with the name "
-            #     '"{title}" already exists. Please enter another name.'
-            # )
-            pass
-        else:
-            raise
-    count = 1
-    while True:
-        try:
-            return func(title=f"{title} {count}", *args, **kwargs)
-        except gspread.exceptions.APIError:
-            count += 1
-
-
-# =============================================================================
-
 
 class Spreadsheet(gspread.Spreadsheet):
-    """A wrapper class around |gspread Worksheet|.
+    """A wrapper class around |gspread Spreadsheet|.
 
-    The :meth:`add_worksheet` method will keep trying to add a worksheet
-    until there isn't a title conflict anymore.
+    The :meth:`add_worksheet` method will change the specified title so
+    that there is no worksheet title conflict.
 
     .. versionadded:: 0.2.0
     """
+
+    @staticmethod
+    def wrap(spreadsheet: gspread.Spreadsheet) -> Spreadsheet:
+        """Converts a |gspread Spreadsheet| into an instance of the
+        |Spreadsheet| wrapper.
+
+        Args:
+            spreadsheet (|gspread Spreadsheet|)
+
+        :rtype: |Spreadsheet|
+
+        .. versionadded:: 0.2.0
+        """
+        # ugly hack to use wrapper class instead of the gspread class
+        spreadsheet.__class__ = Spreadsheet
+        return spreadsheet
+
+    def get_valid_worksheet_title(
+        self, title: str, *, fmt: str = "{title} {num}"
+    ) -> str:
+        """Returns a valid worksheet title from the given title.
+
+        If the title already exists in the spreadsheet, a number will be
+        appended to the end of the title and incremented until there is
+        no longer a conflict.
+
+        Args:
+            title (|str|): The title.
+            fmt (|str|): A template format for how the number is
+                appended to the title. Requires ``"{title}"`` and
+                ``"{num}"`` to be included in the string.
+
+        Returns:
+            |str|: The valid title.
+
+        Raises:
+            ValueError: If ``fmt`` is invalid.
+        """
+        if not ("{title}" in fmt and "{num}" in fmt):
+            raise ValueError(
+                '`fmt` is invalid: requires both "{title}" and "{num}"'
+            )
+        worksheet_titles = set(
+            worksheet.title for worksheet in self.worksheets()
+        )
+        ws_title = title
+        count = 1
+        while ws_title in worksheet_titles:
+            ws_title = fmt.format(title=title, num=count)
+            count += 1
+        return ws_title
 
     def add_worksheet(
         self,
@@ -136,8 +140,8 @@ class Spreadsheet(gspread.Spreadsheet):
         .. versionadded:: 0.2.0
         """
         # pylint: disable=arguments-differ
-        return _set_worksheet_title(
-            super().add_worksheet, title, rows=rows, cols=cols, index=index
+        return super().add_worksheet(
+            self.get_valid_worksheet_title(title), rows, cols, index
         )
 
 
@@ -187,6 +191,8 @@ def col_index_to_letter(col: int) -> str:
 
 # =============================================================================
 
+ValidColor = Union[Color, Tuple[int, int, int], Tuple[float, float, float]]
+
 
 class Worksheet:
     """A wrapper class around |gspread Worksheet|.
@@ -215,19 +221,8 @@ class Worksheet:
     DEFAULT_ROW_HEIGHT: int = 21
     DEFAULT_COL_WIDTH: int = 120
 
-    class DimensionRange(TypedDict):
-        """A dimension range dict.
-
-        .. versionadded:: 0.2.0
-        """
-
-        sheet_id: Required[int]
-        dimension: Required[Literal["ROWS", "COLUMNS"]]
-        startIndex: NotRequired[int]
-        endIndex: NotRequired[int]
-
     def __init__(self, worksheet: gspread.Worksheet):
-        """Initializes a Worksheet.
+        """Initializes a worksheet.
 
         Args:
             worksheet (|gspread Worksheet|): The worksheet returned from
@@ -236,7 +231,7 @@ class Worksheet:
         .. versionadded:: 0.2.0
         """
 
-        self._sheet: gspread.Spreadsheet = worksheet.spreadsheet
+        self._spreadsheet = Spreadsheet.wrap(worksheet.spreadsheet)
         self._worksheet: gspread.Worksheet = worksheet
         self._id: int = worksheet.id
         self._pending_requests: List[Dict] = []
@@ -263,7 +258,9 @@ class Worksheet:
         """
         if val == self.title:
             return
-        _set_worksheet_title(self._worksheet.update_title, val)
+        self._worksheet.update_title(
+            self._spreadsheet.get_valid_worksheet_title(val)
+        )
 
     @property
     def num_rows(self) -> int:
@@ -297,60 +294,8 @@ class Worksheet:
         """
         return self._worksheet.frozen_col_count
 
-    def _get_dim_range(self, range_a1: str, dim: str) -> DimensionRange:
-        """Returns the "DimensionRange" dict of a range.
-
-        Args:
-            range_a1 (|str|): The cell range in A1 notation.
-            dim (|str|): The dimension.
-                Choices: ``ROW``, ``COLUMN``.
-
-        Returns:
-            :data:`DimensionRange`: The dimension range dict.
-
-        .. versionadded:: 0.2.0
-        """
-
-        if dim.lower() not in ("row", "column"):
-            raise ValueError(f"Invalid dimension: {dim}")
-
-        grid: Dict[str, int] = gridrange(range_a1)
-        dim_range: Worksheet.DimensionRange = {
-            "sheet_id": self._id,
-            "dimension": dim.upper() + "S",  # type: ignore[typeddict-item]
-        }
-
-        dim_title = dim.title()
-        if f"start{dim_title}Index" in grid:
-            dim_range["startIndex"] = grid[f"start{dim_title}Index"]
-        if f"end{dim_title}Index" in grid:
-            dim_range["endIndex"] = grid[f"end{dim_title}Index"]
-
-        return dim_range
-
-    def _get_row_range(self, row: Union[str, int]) -> DimensionRange:
-        """Returns the "DimensionRange" dict of a row.
-
-        Args:
-            row (``Union[str, int]``)
-
-        :rtype: |DimensionRange|
-
-        .. versionadded:: 0.2.0
-        """
-        return self._get_dim_range(str(row), "row")
-
-    def _get_col_range(self, col: str) -> DimensionRange:
-        """Returns the "DimensionRange" dict of a column.
-
-        Args:
-            col (|str|)
-
-        :rtype: |DimensionRange|
-
-        .. versionadded:: 0.2.0
-        """
-        return self._get_dim_range(col, "column")
+    def _get_grid_range(self, range_a1: str) -> GridRange:
+        return GridRange.from_range(sheet_id=self._id, range_a1=range_a1)
 
     def update(self):
         """Updates the Google Sheet with the cached requests.
@@ -371,7 +316,7 @@ class Worksheet:
             return
         body = {"requests": self._pending_requests}
         try:
-            self._sheet.batch_update(body)
+            self._spreadsheet.batch_update(body)
         finally:
             self._pending_requests.clear()
 
@@ -467,19 +412,11 @@ class Worksheet:
         if not formula.startswith("="):
             formula = f"={formula}"
 
-        self._pending_requests.append(
-            {
-                "repeatCell": {
-                    "range": gridrange(range_a1, sheet_id=self._id),
-                    "cell": {
-                        "userEnteredValue": {
-                            "formulaValue": formula,
-                        },
-                    },
-                    "fields": "userEnteredValue.formulaValue",
-                }
-            }
+        cell_data = CellData(user_entered_value=ExtendedValue.formula(formula))
+        update_request = cell_data.updateRequest(
+            self._get_grid_range(range_a1)
         )
+        self._pending_requests.append(update_request)
 
         if update:
             self.update()
@@ -662,24 +599,14 @@ class Worksheet:
         .. versionadded:: 0.2.0
         """
 
-        freezing = {}
-        if rows is not None and rows >= 0:
-            freezing["frozenRowCount"] = rows
-        if cols is not None and cols >= 0:
-            freezing["frozenColumnCount"] = cols
-        if len(freezing) > 0:
+        if not (rows is None and cols is None):
             self._pending_requests.append(
-                {
-                    "updateSheetProperties": {
-                        "properties": {
-                            "sheetId": self._id,
-                            "gridProperties": freezing,
-                        },
-                        "fields": ",".join(
-                            f"gridProperties.{f}" for f in freezing
-                        ),
-                    }
-                }
+                SheetProperties(
+                    sheet_id=self._id,
+                    grid_properties=GridProperties(
+                        frozen_row_count=rows, frozen_col_count=cols
+                    ),
+                ).updateRequest()
             )
 
         if update:
@@ -698,19 +625,9 @@ class Worksheet:
 
         .. versionadded:: 0.2.0
         """
-
         self._pending_requests.append(
-            {
-                "updateDimensionProperties": {
-                    "properties": {
-                        "hiddenByUser": True,
-                    },
-                    "fields": "hiddenByUser",
-                    "range": dim_range,
-                }
-            }
+            DimensionProperties(hidden_by_user=True).updateRequest(dim_range)
         )
-
         if update:
             self.update()
 
@@ -727,7 +644,10 @@ class Worksheet:
 
         .. versionadded:: 0.2.0
         """
-        self._hide(self._get_row_range(row), update=update)
+        self._hide(
+            DimensionRange.rows(sheet_id=self._id, range_a1=str(row)),
+            update=update,
+        )
 
     def hide_col(self, col_a1: str, *, update: bool = False):
         """Hides the given column(s).
@@ -742,7 +662,10 @@ class Worksheet:
 
         .. versionadded:: 0.2.0
         """
-        self._hide(self._get_col_range(col_a1), update=update)
+        self._hide(
+            DimensionRange.cols(sheet_id=self._id, range_a1=col_a1),
+            update=update,
+        )
 
     def _set_row_col_size(
         self, dim_range: DimensionRange, size: int, *, update: bool = False
@@ -758,19 +681,9 @@ class Worksheet:
 
         .. versionadded:: 0.2.0
         """
-
         self._pending_requests.append(
-            {
-                "updateDimensionProperties": {
-                    "properties": {
-                        "pixelSize": size,
-                    },
-                    "fields": "pixelSize",
-                    "range": dim_range,
-                }
-            }
+            DimensionProperties(pixel_size=size).updateRequest(dim_range)
         )
-
         if update:
             self.update()
 
@@ -800,7 +713,11 @@ class Worksheet:
 
         .. versionadded:: 0.2.0
         """
-        self._set_row_col_size(self._get_row_range(row), height, update=update)
+        self._set_row_col_size(
+            DimensionRange.rows(sheet_id=self._id, range_a1=str(row)),
+            height,
+            update=update,
+        )
 
     def reset_col_width(self, col_a1: str, *, update: bool = False):
         """Resets the width of the given column(s) to
@@ -827,14 +744,23 @@ class Worksheet:
         .. versionadded:: 0.2.0
         """
         self._set_row_col_size(
-            self._get_col_range(col_a1), width, update=update
+            DimensionRange.cols(sheet_id=self._id, range_a1=col_a1),
+            width,
+            update=update,
         )
 
-    def merge_cells(self, range_a1: str, *, update: bool = False):
+    def merge_cells(
+        self,
+        range_a1: str,
+        *,
+        merge_type: MergeType = MergeType.MERGE_ALL,
+        update: bool = False,
+    ):
         """Merges the given range of cells.
 
         Args:
             range_a1 (|str|): The cell range in A1 notation.
+            merge_type (|MergeType|): The merge type.
             update (|bool|): Whether to update the worksheet.
 
         Raises:
@@ -847,12 +773,7 @@ class Worksheet:
         """
 
         self._pending_requests.append(
-            {
-                "mergeCells": {
-                    "range": gridrange(range_a1, sheet_id=self._id),
-                    "mergeType": "MERGE_ALL",
-                }
-            }
+            self._get_grid_range(range_a1).mergeRequest(merge_type=merge_type)
         )
 
         if update:
@@ -863,12 +784,16 @@ class Worksheet:
         range_a1: str,
         *,
         font_family: Optional[str] = None,
+        font_size: Optional[int] = None,
         bold: Optional[bool] = None,
-        background_color: Optional[Color] = None,
-        text_color: Optional[Color] = None,
-        text_align: Optional[str] = None,
-        vertical_align: Optional[str] = None,
-        wrap: Optional[str] = None,
+        italic: Optional[bool] = None,
+        strikethrough: Optional[bool] = None,
+        underline: Optional[bool] = None,
+        background_color: Optional[ValidColor] = None,
+        text_color: Optional[ValidColor] = None,
+        text_align: Optional[HorizontalAlign] = None,
+        vertical_align: Optional[VerticalAlign] = None,
+        wrap: Optional[WrapStrategy] = None,
         update: bool = False,
     ):
         """Formats the given cell(s).
@@ -876,67 +801,60 @@ class Worksheet:
         Args:
             range_a1 (|str|): The cell range in A1 notation.
             font_family (|str|): The font family.
+            font_size (|int|): The font size.
             bold (|bool|): Whether the text is bold.
-            background_color (|Color|): The background color.
-            text_color (|Color|): The text color.
-            text_align (|str|): The text (horizontal) alignment type.
-                Choices: ``LEFT``, ``CENTER``, ``RIGHT``.
-            vertical_align (|str|): The vertical alignment type.
-                Choices: ``TOP``, ``MIDDLE``, ``BOTTOM``.
-            wrap (|str|): The wrapping type.
-                Choices: ``OVERFLOW_CELL``, ``CLIP``, ``WRAP``.
-            update (|bool|): Whether to update the Worksheet.
+            italic (|bool|): Whether the text is in italics.
+            strikethrough (|bool|): Whether the text has a
+                strikethrough.
+            underline (|bool|): Whether the text is has an underline.
+            background_color(|ValidColor|): The background color.
+            text_color (|ValidColor|): The text color.
+            text_align (|HorizontalAlign|): The text (horizontal)
+                alignment type.
+            vertical_align (|VerticalAlign|): The vertical alignment
+                type.
+            wrap (|WrapStrategy|): The wrapping type.
+            update (|bool|): Whether to update the worksheet.
+
+        .. |ValidColor| replace::
+           |Color| or
+           ``Tuple[int, int, int]`` or
+           ``Tuple[float, float, float]``
 
         .. versionadded:: 0.2.0
         """
 
-        fmt: Dict[str, Any] = {}
-        text_fmt: Dict[str, Any] = {}
-        fields = []
+        fmt_kwargs: Dict[str, Any] = {}
 
-        if font_family is not None:
-            text_fmt["fontFamily"] = font_family
-            fields.append("textFormat.fontFamily")
-        if bold is not None:
-            text_fmt["bold"] = bold
-            fields.append("textFormat.bold")
         if background_color is not None:
-            fmt["backgroundColor"] = _get_color_dict(background_color)
-            fields.append("backgroundColor")
-        if text_color is not None:
-            text_fmt["foregroundColor"] = _get_color_dict(text_color)
-            fields.append("textFormat.foregroundColor")
+            fmt_kwargs["background_color_style"] = ColorStyle.auto(
+                background_color
+            )
         if text_align is not None:
-            fmt["horizontalAlignment"] = text_align
-            fields.append("horizontalAlignment")
+            fmt_kwargs["horizontal_alignment"] = text_align
         if vertical_align is not None:
-            fmt["verticalAlignment"] = vertical_align
-            fields.append("verticalAlignment")
+            fmt_kwargs["vertical_alignment"] = vertical_align
         if wrap is not None:
-            fmt["wrapStrategy"] = wrap
-            fields.append("wrapStrategy")
+            fmt_kwargs["wrap_strategy"] = wrap
 
-        if len(fields) == 0:
-            if update:
-                self.update()
-            return
-
-        if len(text_fmt) > 0:
-            fmt["textFormat"] = text_fmt
-
-        self._pending_requests.append(
-            {
-                "repeatCell": {
-                    "range": gridrange(range_a1, sheet_id=self._id),
-                    "cell": {
-                        "userEnteredFormat": fmt,
-                    },
-                    "fields": ",".join(
-                        f"userEnteredFormat.{f}" for f in fields
-                    ),
-                }
-            }
+        foreground_color_style = None
+        if text_color is not None:
+            foreground_color_style = ColorStyle.auto(text_color)
+        fmt_kwargs["text_format"] = TextFormat(
+            foreground_color_style=foreground_color_style,
+            font_family=font_family,
+            font_size=font_size,
+            bold=bold,
+            italic=italic,
+            strikethrough=strikethrough,
+            underline=underline,
         )
+
+        if len(fmt_kwargs) > 0:
+            cell_data = CellData(user_entered_format=CellFormat(**fmt_kwargs))
+            self._pending_requests.append(
+                cell_data.updateRequest(self._get_grid_range(range_a1))
+            )
 
         if update:
             self.update()
@@ -944,7 +862,7 @@ class Worksheet:
     def format_number_cell(
         self,
         range_a1: str,
-        fmt_type: str,
+        fmt_type: NumberFormatType,
         pattern: str,
         *,
         update: bool = False,
@@ -953,10 +871,7 @@ class Worksheet:
 
         Args:
             range_a1 (|str|): The cell range.
-            fmt_type (|str|): The format type.
-                Choices: ``TEXT``, ``NUMBER``, ``PERCENT``,
-                ``CURRENCY``, ``DATE``, ``TIME``, ``DATE_TIME``,
-                ``SCIENTIFIC``.
+            fmt_type (|NumberFormatType|): The format type.
             pattern (|str|): The formatting pattern.
                 See https://developers.google.com/sheets/api/guides/formats.
             update (|bool|): Whether to update the worksheet.
@@ -964,21 +879,15 @@ class Worksheet:
         .. versionadded:: 0.2.0
         """
 
+        cell_data = CellData(
+            user_entered_format=CellFormat(
+                number_format=NumberFormat(
+                    format_type=fmt_type, pattern=pattern
+                )
+            )
+        )
         self._pending_requests.append(
-            {
-                "repeatCell": {
-                    "range": gridrange(range_a1, sheet_id=self._id),
-                    "cell": {
-                        "userEnteredFormat": {
-                            "numberFormat": {
-                                "type": fmt_type,
-                                "pattern": pattern,
-                            },
-                        },
-                    },
-                    "fields": "userEnteredFormat.numberFormat",
-                }
-            }
+            cell_data.updateRequest(self._get_grid_range(range_a1))
         )
 
         if update:

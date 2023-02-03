@@ -23,6 +23,7 @@ from codepost_powertools.utils.types import PathLike, SuccessOrNone
 # =============================================================================
 
 __all__ = (
+    # re-export everything from the wrappers
     "Color",
     "Spreadsheet",
     "col_letter_to_index",
@@ -172,20 +173,17 @@ def open_spreadsheet(
         success, _ = authenticate_client(log=log)
         if not success:
             return False, None
+    # `authenticate_client()` sets `_GLOBAL_CLIENT`, so it can't be None
+    # at this point
 
     _logger = _get_logger(log)
 
     _logger.info("Opening spreadsheet {!r}", sheet_name)
 
     try:
-        # `authenticate_client()` sets `_GLOBAL_CLIENT`, so it can't be
-        # None at this point
-        spreadsheet = _GLOBAL_CLIENT.open(  # type: ignore[union-attr]
-            sheet_name
+        return True, Spreadsheet.wrap(
+            _GLOBAL_CLIENT.open(sheet_name)  # type: ignore[union-attr]
         )
-        # ugly hack, but use wrapper class instead of the gspread class
-        spreadsheet.__class__ = Spreadsheet
-        return True, spreadsheet
     except gspread.SpreadsheetNotFound:
         pass
     handle_error(

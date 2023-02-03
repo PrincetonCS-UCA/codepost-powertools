@@ -83,6 +83,16 @@ autodoc_member_order = "bysource"
 # type hints from the signature
 autodoc_typehints = "description"
 
+
+def autodoc_skip_meta_docskip(  # pylint: disable=inconsistent-return-statements
+    app, what, name, obj, skip, options
+):
+    if ":meta docskip:" in (getattr(obj, "__doc__", "") or ""):
+        # if a meta field "docskip" is present, skip this object
+        return True
+    # Handler should return "None" to fall back to other behavior
+
+
 # Intersphinx
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
@@ -100,3 +110,9 @@ napoleon_numpy_docstring = False
 import generate_cli_docs
 
 generate_cli_docs.generate()
+
+# -- Setup -------------------------------------------------------------------
+
+
+def setup(app):
+    app.connect("autodoc-skip-member", autodoc_skip_meta_docskip)
