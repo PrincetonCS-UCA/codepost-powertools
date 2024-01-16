@@ -24,7 +24,6 @@ Type definitions and aliases.
    The assignment object, or the assignment name.
 
 .. data:: SuccessOrNone
-   :canonical: codepost_powertools._utils.types.SuccessOrNone
 
    Alias (generic ``T``) =
    ``Tuple[Literal[True], T]`` | ``Tuple[Literal[False], None]``

@@ -33,7 +33,7 @@ from tests.helpers import (
 )
 from tests.mocks import MockAssignment, MockCourse, MockRoster
 
-patch_mock_func = patch_with_default_module(codepost_utils)
+patch_cputils_mock_func = patch_with_default_module(codepost_utils)
 
 # =============================================================================
 
@@ -71,7 +71,7 @@ def fixture_mock_get_course(request):
     kwargs = get_request_param(request, default={})
     mock_func = MockGetCourse(**kwargs)
     with pytest.MonkeyPatch.context() as monkeypatch:
-        patch_mock_func(monkeypatch, request, "get_course", mock_func)
+        patch_cputils_mock_func(monkeypatch, request, "get_course", mock_func)
         yield mock_func
 
 
@@ -169,7 +169,9 @@ def fixture_mock_get_course_roster(request, mock_with_course):
     kwargs = get_request_param(request, default={})
     mock_func = MockGetCourseRoster(**kwargs)
     with pytest.MonkeyPatch.context() as monkeypatch:
-        patch_mock_func(monkeypatch, request, "get_course_roster", mock_func)
+        patch_cputils_mock_func(
+            monkeypatch, request, "get_course_roster", mock_func
+        )
         yield mock_func
 
 
@@ -213,7 +215,9 @@ def fixture_mock_get_assignment(request):
     kwargs = get_request_param(request, default={})
     mock_func = MockGetAssignment(**kwargs)
     with pytest.MonkeyPatch.context() as monkeypatch:
-        patch_mock_func(monkeypatch, request, "get_assignment", mock_func)
+        patch_cputils_mock_func(
+            monkeypatch, request, "get_assignment", mock_func
+        )
         yield mock_func
 
 

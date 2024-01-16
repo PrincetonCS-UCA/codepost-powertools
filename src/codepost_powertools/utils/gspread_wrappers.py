@@ -51,7 +51,7 @@ __all__ = (
 # =============================================================================
 
 
-class Spreadsheet(gspread.Spreadsheet):
+class Spreadsheet:
     """A wrapper class around |gspread Spreadsheet|.
 
     The :meth:`add_worksheet` method will change the specified title so
@@ -60,21 +60,20 @@ class Spreadsheet(gspread.Spreadsheet):
     .. versionadded:: 0.2.0
     """
 
-    @staticmethod
-    def wrap(spreadsheet: gspread.Spreadsheet) -> Spreadsheet:
-        """Converts a |gspread Spreadsheet| into an instance of the
-        |Spreadsheet| wrapper.
+    def __init__(self, spreadsheet: gspread.Spreadsheet):
+        """Initializes a spreadsheet.
 
         Args:
-            spreadsheet (|gspread Spreadsheet|)
-
-        :rtype: |Spreadsheet|
+            spreadsheet (|gspread Spreadsheet|): The spreadsheet
+                returned from ``gspread``.
 
         .. versionadded:: 0.2.0
         """
-        # ugly hack to use wrapper class instead of the gspread class
-        spreadsheet.__class__ = Spreadsheet
-        return spreadsheet
+        self._spreadsheet = spreadsheet
+
+    def __getattr__(self, name):
+        # pass all attempted attribute accesses to the spreadsheet
+        return getattr(self._spreadsheet, name)
 
     def get_valid_worksheet_title(
         self, title: str, *, fmt: str = "{title} {num}"
@@ -96,13 +95,15 @@ class Spreadsheet(gspread.Spreadsheet):
 
         Raises:
             ValueError: If ``fmt`` is invalid.
+
+        .. versionadded:: 0.2.0
         """
         if not ("{title}" in fmt and "{num}" in fmt):
             raise ValueError(
                 '`fmt` is invalid: requires both "{title}" and "{num}"'
             )
         worksheet_titles = set(
-            worksheet.title for worksheet in self.worksheets()
+            worksheet.title for worksheet in self._spreadsheet.worksheets()
         )
         ws_title = title
         count = 1
@@ -139,10 +140,26 @@ class Spreadsheet(gspread.Spreadsheet):
 
         .. versionadded:: 0.2.0
         """
-        # pylint: disable=arguments-differ
-        return super().add_worksheet(
+        return self._spreadsheet.add_worksheet(
             self.get_valid_worksheet_title(title), rows, cols, index
         )
+
+    def del_worksheets(self, worksheets: Iterable[gspread.Worksheet]):
+        """Deletes the given worksheets from the spreadsheet.
+
+        Args:
+            worksheets (``Iterable`` [|gspread Worksheet|]):
+                The worksheets.
+
+        .. versionadded:: 0.2.0
+        """
+        body = {
+            "requests": [
+                {"deleteSheet": {"sheetId": worksheet.id}}
+                for worksheet in worksheets
+            ]
+        }
+        return self._spreadsheet.batch_update(body)
 
 
 # =============================================================================
@@ -198,28 +215,18 @@ class Worksheet:
     """A wrapper class around |gspread Worksheet|.
 
     .. versionadded:: 0.2.0
-
-    .. data:: DEFAULT_ROW_HEIGHT
-       :type: int
-       :value: 21
-
-       The default height of a row.
-
-    .. data:: DEFAULT_COL_WIDTH
-       :type: int
-       :value: 120
-
-       The default width of a column.
-
-       .. note::
-          Newly created spreadsheets will have column widths of 100, but
-          the "Resize Column" popup says the default is 120.
-
-    .. |DimensionRange| replace:: ``DimensionRange``
     """
 
     DEFAULT_ROW_HEIGHT: int = 21
+    """The default height of a row."""
+
     DEFAULT_COL_WIDTH: int = 120
+    """The default width of a column.
+
+    .. note::
+       Newly created spreadsheets will have column widths of 100, but
+       the "Resize Column" popup says the default is 120.
+    """
 
     def __init__(self, worksheet: gspread.Worksheet):
         """Initializes a worksheet.
@@ -231,7 +238,7 @@ class Worksheet:
         .. versionadded:: 0.2.0
         """
 
-        self._spreadsheet = Spreadsheet.wrap(worksheet.spreadsheet)
+        self._spreadsheet = Spreadsheet(worksheet.spreadsheet)
         self._worksheet: gspread.Worksheet = worksheet
         self._id: int = worksheet.id
         self._pending_requests: List[Dict] = []
@@ -320,17 +327,17 @@ class Worksheet:
         finally:
             self._pending_requests.clear()
 
-    def get_cell(self, cell_a1: str) -> gspread.Cell:
-        """Gets a cell of the worksheet.
+    def get_value(self, cell_a1: str) -> Any:
+        """Gets a value of the worksheet.
 
         Args:
             cell_a1 (|str|): The cell in A1 notation.
 
-        :rtype: |gspread Cell|
+        :rtype: |Any|
 
         .. versionadded:: 0.2.0
         """
-        return self._worksheet.acell(cell_a1)
+        return self._worksheet.acell(cell_a1).value
 
     def get_values(self) -> List[List[str]]:
         """Gets all the values of the worksheet as a 2D list.

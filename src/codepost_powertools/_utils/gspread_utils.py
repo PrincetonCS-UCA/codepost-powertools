@@ -181,7 +181,7 @@ def open_spreadsheet(
     _logger.info("Opening spreadsheet {!r}", sheet_name)
 
     try:
-        return True, Spreadsheet.wrap(
+        return True, Spreadsheet(
             _GLOBAL_CLIENT.open(sheet_name)  # type: ignore[union-attr]
         )
     except gspread.SpreadsheetNotFound:

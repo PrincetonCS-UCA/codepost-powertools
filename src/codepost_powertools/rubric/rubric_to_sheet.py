@@ -18,6 +18,7 @@ from typing import Any, Dict, Iterable, List, Literal, Optional, Tuple, Union
 
 import click
 import cloup
+import gspread
 
 from codepost_powertools._utils import _get_logger, with_pluralized
 from codepost_powertools._utils.cli_utils import (
@@ -391,48 +392,80 @@ def _get_worksheets(
     """
     _logger = _get_logger(log)
 
+    assignment_ids = []
+    assignment_names = []
+    for assignment in assignments:
+        assignment_ids.append(assignment.id)
+        assignment_names.append(assignment.name)
+
     existing = sheet.worksheets()
     # add a temporary worksheet so we don't have to deal with edge case
     # of removing all the sheets (which is an error)
     temp = sheet.add_worksheet(title="__temp")
 
-    existing_assignment_worksheets = {}
+    # maps: assignment id -> worksheet
+    existing_assignment_worksheets: Dict[int, gspread.Worksheet] = {}
 
     if wipe:
         # delete all current sheets
-        num_existing = len(existing)
         _logger.debug(
-            "Wiping {}", with_pluralized(num_existing, "existing worksheet")
+            "Wiping {}", with_pluralized(len(existing), "existing worksheet")
         )
-        for _ in range(num_existing):
-            sheet.del_worksheet(existing.pop())
+        sheet.del_worksheets(existing)
     elif replace:
         # get worksheets for each assignment
-        for index, worksheet in enumerate(existing):
+        assignment_ids_set = set(assignment_ids)
+        multiple_warning = set()
+        for worksheet in existing:
             # assume the first cell contains the assignment id
-            a1 = Worksheet(worksheet).get_cell("A1").value
-            if a1 is not None and a1.isdigit():
-                existing_assignment_worksheets[int(a1)] = (worksheet, index)
+            a1 = Worksheet(worksheet).get_value("A1")
+            if a1 is None:
+                continue
+            if isinstance(a1, int):
+                a_id = a1
+            elif isinstance(a1, str):
+                if not a1.isdigit():
+                    continue
+                a_id = int(a1)
+            else:
+                # unknown type; assume it can't be an assignment id
+                # note: this branch is untested; not sure what value
+                # would case this
+                _logger.warning(
+                    "Unknown value in {!r}!A1: {}", worksheet.title, a1
+                )
+                continue
+            if a_id not in assignment_ids_set:
+                continue
+            if a_id in existing_assignment_worksheets:
+                if a_id not in multiple_warning:
+                    _logger.warning(
+                        "Multiple worksheets for assignment id {}; "
+                        "using first one found ({!r})",
+                        a_id,
+                        existing_assignment_worksheets[a_id].title,
+                    )
+                    multiple_warning.add(a_id)
+                continue
+            existing_assignment_worksheets[a_id] = worksheet
 
     _logger.info("Getting worksheets for each assignment")
+    # maps: assignment name -> worksheet
+    worksheets = {}
     found = 0
     created = 0
 
-    worksheets = {}
-
-    for assignment in assignments:
-        a_id = assignment.id
-        a_name = assignment.name
-
-        this_worksheet = None
-
+    for a_id, a_name in zip(assignment_ids, assignment_names):
         if replace and a_id in existing_assignment_worksheets:
-            _logger.debug("Replacing worksheet for assignment {!r}", a_name)
+            worksheet = existing_assignment_worksheets.pop(a_id)
+            title = worksheet.title
+            index = worksheet.index
+            _logger.debug(
+                "Replacing worksheet {!r} for assignment {!r}", title, a_name
+            )
             found += 1
             # TODO: actually replace existing worksheet rather than
             #   deleting and adding new worksheet in its place
-            worksheet, index = existing_assignment_worksheets.pop(a_id)
-            title = worksheet.title
             sheet.del_worksheet(worksheet)
             # add new worksheet in same place
             this_worksheet = Worksheet(
@@ -554,7 +587,12 @@ def _get_codepost_rubric_as_data_rows(
                 _format_is_template(comment.templateTextOn),
             ]
 
-    _logger.debug("Got all rubric comments for assignment {!r}", a_name)
+    if len(rubric_data) == 0:
+        _logger.warning(
+            "Assignment {!r} does not have any rubric comments", a_name
+        )
+    else:
+        _logger.debug("Got all rubric comments for assignment {!r}", a_name)
 
     return rubric_data
 
@@ -696,15 +734,16 @@ def export_rubric(
     """Exports a codePost rubric to a Google Sheet.
 
     Each assignment's rubric will be exported into a single worksheet of
-    the given Google Sheet. If ``wipe`` is True, the entire sheet will
-    be wiped first. If ``replace`` is True, whenever an assignment being
-    exported sees an existing worksheet, it will replace that sheet with
-    the current exported rubric.
+    the given Google Sheet. If ``wipe`` is True, the entire spreadsheet
+    will be wiped first. Otherwise, if ``replace`` is True, whenever an
+    assignment being exported sees an existing worksheet, it will
+    replace that worksheet with the current exported rubric.
 
-    If ``count_instances`` is True, it will count the number of
-    instances of each rubric comment. Note that this may be slow, since
-    it will have to loop through all the applied comments in the
-    assignment submissions.
+    If ``count_instances`` is True, each exported rubric comment will
+    also count the number of its applied instances, including the number
+    of upvote and downvote feedback from students. Note that this may be
+    slow, since it will have to loop through all the applied comments in
+    the assignment submissions.
 
     This function will return a mapping from assignment names to a bool
     representing whether the export for that assignment was successful.
@@ -788,6 +827,8 @@ def export_rubric(
     comment_ids = {}
     for assignment_name, assignment in valid_assignments.items():
         comments = _get_codepost_rubric_as_data_rows(assignment, log=log)
+        if len(comments) == 0:
+            continue
         comment_ids[assignment_name] = comments
 
         values = [
@@ -801,9 +842,21 @@ def export_rubric(
         )
         worksheet = worksheets[assignment_name]
         worksheet.set_values(values)
-        worksheet.bulk_format(
-            **_assignment_worksheet_format_kwargs(headers), update=True
-        )
+
+        try:
+            worksheet.bulk_format(
+                **_assignment_worksheet_format_kwargs(headers), update=True
+            )
+        except Exception as ex:  # pylint: disable=broad-except
+            if log:
+                # catch errors and log them, allowing all the other
+                # assignments to be exported
+                _logger.error(
+                    "Error while formatting: {}: {}", ex.__class__.__name__, ex
+                )
+                continue
+            # just allow all errors to propagate up and crash
+            raise
 
         successes[assignment_name] = True
 

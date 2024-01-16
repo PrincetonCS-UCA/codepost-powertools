@@ -43,6 +43,7 @@ def fixture_create_tmp_file(request, tmp_path):
         raise TypeError(f"unknown type for `args`: {args.__class__.__name__}")
     path = tmp_path.joinpath(*filename)
     if contents is not None:
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(contents, encoding="utf-8")
     else:
         path.unlink(missing_ok=True)

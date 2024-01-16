@@ -171,12 +171,21 @@ def log_start_end(func):
     uncaught exceptions during execution.
 
     .. versionadded:: 0.1.0
+    .. versionchanged:: 0.2.0
+       Added command name to "Start" and "Done" logs.
     """
+
+    # get the command name, assuming that the function name has the
+    # format "{command}_cmd"
+    # can't use `str.removesuffix` because that was introduced in 3.9
+    cmd_name = func.__name__
+    if cmd_name.endswith("_cmd"):
+        cmd_name = cmd_name[: -len("_cmd")]
 
     @functools.wraps(func)
     @click.pass_context
     def log(ctx, **kwargs):
-        logger.trace("Start")
+        logger.trace("Start: {}", cmd_name)
         stopwatch = Stopwatch().start()
 
         had_error = False
@@ -198,7 +207,7 @@ def log_start_end(func):
                 # also pass `log=True`
                 ctx.invoke(func, **kwargs, log=True)
 
-        logger.trace("Done")
+        logger.trace("Done: {}", cmd_name)
         logger.trace("Total time: {}", stopwatch.elapsed_str())
 
         if had_error:
